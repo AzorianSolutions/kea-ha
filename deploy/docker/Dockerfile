@@ -33,9 +33,10 @@ RUN mkdir -p /usr/src/kea && \
     cd /usr/src/kea && \
     wget -c https://gitlab.isc.org/isc-projects/kea/-/archive/Kea-${KEA_VERSION}/kea-Kea-${KEA_VERSION}.tar.gz && \
     tar -xzf kea-Kea-${KEA_VERSION}.tar.gz && \
-    cd kea-Kea-${KEA_VERSION}
+    mv kea-Kea-${KEA_VERSION} ${KEA_VERSION} && \
+    cd ${KEA_VERSION}
 
-WORKDIR /usr/src/kea/kea-Kea-${KEA_VERSION}
+WORKDIR /usr/src/kea/${KEA_VERSION}
 
 RUN autoreconf --install && \
     ./configure --prefix="" --enable-shell --enable-perfdhcp --with-mysql --with-pgsql && \
@@ -59,7 +60,8 @@ RUN apt-get purge -y --auto-remove \
         liblog4cplus-2.0.5 \
         libmysqlclient21 \
         libpq5 && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/src/kea
 
 
 FROM base AS runner
@@ -92,9 +94,8 @@ WORKDIR ${KHA_SHARE_PATH}
 # Copy the Kea binaries, documentation, and source code into the container
 COPY --from=builder /sbin/ /sbin/
 COPY --from=builder /usr/lib/*kea* /usr/lib/
-COPY --from=builder /usr/src/kea /usr/src/
-COPY --from=builder /share/doc/kea /usr/share/doc/kea
-COPY --from=builder /share/kea /usr/share/kea
+COPY --from=builder /share/doc/kea /share/doc/kea
+COPY --from=builder /share/kea /share/kea
 
 # Copy the default environment settings into the container
 COPY defaults.env ${KHA_SHARE_PATH}/defaults.env
