@@ -10,6 +10,7 @@ Kea HA deployments using Docker containers.
 | `latest` |    [![Kea Docker Image](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml/badge.svg?branch=latest)](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml)     |
 |  `dev`   |      [![Kea Docker Image](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml/badge.svg?branch=dev)](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml)      |
 | `2.5.4`  | [![Kea Docker Image](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml/badge.svg?branch=release/2.5.4)](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml) |
+| `2.5.3`  | [![Kea Docker Image](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml/badge.svg?branch=release/2.5.3)](https://github.com/AzorianSolutions/kea-ha/actions/workflows/build-and-publish.yml) |
 
 ## [Features](https://github.com/AzorianSolutions/kea-ha/blob/main/docs/wiki/project/features.md):
 
