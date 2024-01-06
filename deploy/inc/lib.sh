@@ -109,7 +109,6 @@ build_image () {
           -t "${KEA_IMAGE_REPO_URL}/${KEA_IMAGE_REPO_USERNAME}/${KEA_IMAGE_NAME}:${TAG}" \
           -f deploy/docker/Dockerfile .\
           --target "${TARGET}" \
-          --no-cache \
           --build-arg KHA_SHARE_PATH="${KHA_SHARE_PATH}" \
           --build-arg KEA_VERSION="${KEA_VERSION}"
 }
