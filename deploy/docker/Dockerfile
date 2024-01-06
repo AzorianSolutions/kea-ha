@@ -89,7 +89,7 @@ RUN adduser --system --no-create-home --disabled-password --group kea
 
 WORKDIR ${KHA_SHARE_PATH}
 
-# Copy the Kea binaries into the container
+# Copy the Kea binaries, documentation, and source code into the container
 COPY --from=builder /sbin/ /sbin/
 COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /usr/src/kea /usr/src/
