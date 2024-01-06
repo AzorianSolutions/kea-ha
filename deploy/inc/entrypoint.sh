@@ -173,4 +173,4 @@ if [ "$KEA_DB_TYPE" == "postgresql" ]; then
 fi
 
 # Start the main supervisord process that spawns Kea services
-supervisord -c /etc/supervisor/supervisord.conf
+supervisord -j /run/supervisord.pid -c /etc/supervisor/supervisord.conf
