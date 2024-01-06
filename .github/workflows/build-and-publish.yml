@@ -1,0 +1,92 @@
+---
+name: 'Kea Docker Image'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'dev'
+      - 'latest'
+      - 'release/**'
+    tags:
+      - '-v*.*.*'
+    paths:
+      - deploy/docker/Dockerfile
+      - deploy/inc/entrypoint.sh
+      - deploy/tpl/*
+  pull_request:
+    branches:
+      - 'dev'
+      - 'latest'
+      - 'release/**'
+    tags:
+      - '-v*.*.*'
+    paths:
+      - deploy/docker/Dockerfile
+      - deploy/inc/entrypoint.sh
+      - deploy/tpl/*
+
+jobs:
+  build-and-push-docker-image:
+    name: Build Docker Image
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: Import Environment Configuration
+        run: |
+          cat ./defaults.env >> $GITHUB_ENV
+
+      - name: Docker Image Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            azoriansolutions/kea-ha
+          tags: |
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Docker Buildx Setup
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker Hub Authentication
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Docker Image Build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile
+          build-args: |
+            KHA_VERSION=${{env.KHA_VERSION}}
+            KHA_SHARE_PATH=${{env.KHA_SHARE_PATH}}
+            KEA_VERSION=${{env.KEA_VERSION}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: azoriansolutions/kea-ha:${{ env.KEA_IMAGE_TAG }}
+
+      - name: Docker Image Release Tagging
+        uses: docker/build-push-action@v5
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        with:
+          context: .
+          file: ./deploy/docker/Dockerfile
+          build-args: |
+            KHA_VERSION=${{env.KHA_VERSION}}
+            KHA_SHARE_PATH=${{env.KHA_SHARE_PATH}}
+            KEA_VERSION=${{env.KEA_VERSION}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

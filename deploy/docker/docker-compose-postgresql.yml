@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:${KEA_DB_VERSION}
+    restart: unless-stopped
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+    networks:
+      - db0
+    environment:
+      - POSTGRES_USER=${KEA_DB_USER}
+      - POSTGRES_PASSWORD=${KEA_DB_PASSWORD}
+      - POSTGRES_DB=${KEA_DB_NAME}
+  kea:
+    image: ${KEA_IMAGE_REPO_USERNAME}/${KEA_IMAGE_NAME}:${KEA_IMAGE_TAG}
+    restart: unless-stopped
+    depends_on: [ db ]
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    privileged: true
+    volumes:
+      - /var/lib/kea:/var/lib/kea
+      - /var/log/kea:/var/log/kea
+      - /var/log/supervisor:/var/log/supervisor
+    networks:
+      db0:
+      mgmt0:
+        ipv4_address: ${KEA_MGMT4_IP}
+      subdhcp0:
+        ipv4_address: ${KEA_DHCP4_IP}
+    ports:
+      - 8000:8000
+    env_file:
+      - build/docker/.env
+networks:
+  db0:
+    name: db0
+    driver: bridge
+  mgmt0:
+    name: mgmt0
+    driver: ipvlan
+    driver_opts:
+      ipvlan_mode: l2
+      parent: ${KEA_MGMT_INTERFACE}
+    ipam:
+      driver: default
+      config:
+          - subnet: "${KEA_MGMT4_SUBNET}"
+            gateway: "${KEA_MGMT4_GW_IP}"
+  subdhcp0:
+    name: subdhcp0
+    driver: ipvlan
+    driver_opts:
+      ipvlan_mode: l2
+      parent: ${KEA_DHCP_INTERFACE}
+    ipam:
+      driver: default
+      config:
+          - subnet: "${KEA_DHCP4_SUBNET}"
+            gateway: "${KEA_DHCP4_GW_IP}"

@@ -1,0 +1,50 @@
+---
+name: 🐛 Bug Report
+description: Report a reproducible bug in the current release of Kea-HA
+labels: ["bug / broken-feature"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        **NOTE:** This form is only for reporting _reproducible bugs_ in a current Kea-HA
+        installation. If you're having trouble with installation or just looking for
+        assistance with using Kea-HA, please visit our
+        [discussion forum](https://github.com/AzorianSolutions/kea-ha/discussions) instead.
+  - type: dropdown
+    attributes:
+      label: Kea-HA version
+      description: What version of Kea-HA are you currently running?
+      options:
+        - "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: >
+        Describe in detail the exact steps that someone else can take to
+        reproduce this bug using the current stable release of Kea-HA. Begin with the
+        creation of any necessary database objects and call out every operation being
+        performed explicitly. If reporting a bug in the REST API, be sure to reconstruct
+        the raw HTTP request(s) being made. Additionally, **do not rely on the demo instance** for reproducing
+        suspected bugs, as its data is prone to modification or deletion at any time.
+      placeholder: |
+        1. Run command "./ctrl.sh configure"
+        2. Provide input all the way to the "db username" prompt
+        3. Enter the following value for "db username": "_$$@jd"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I should have been able to complete the configuration process from start to finish
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Observed Behavior
+      description: What happened instead?
+      placeholder: An exception occurred when I entered the value "_$$@jd" for "db username"
+    validations:
+      required: true
