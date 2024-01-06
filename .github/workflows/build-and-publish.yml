@@ -7,7 +7,6 @@ on:
     branches:
       - 'dev'
       - 'latest'
-      - 'release/**'
     tags:
       - '-v*.*.*'
     paths:
@@ -18,7 +17,6 @@ on:
     branches:
       - 'dev'
       - 'latest'
-      - 'release/**'
     tags:
       - '-v*.*.*'
     paths:
