@@ -93,7 +93,7 @@ input_kea_version () {
 }
 
 input_kea_log_severity () {
-  echo -e "What log severity would you like Kea send to STDOUT? [Default: $KEA_LOG_SEVERITY] [Options: DEBUG INFO WARN ERROR FATAL]\n"
+  echo -e "What is the minimum log severity you want Kea log? [Default: $KEA_LOG_SEVERITY] [Options: DEBUG INFO WARN ERROR FATAL]\n"
   read -rp "Severity: " KEA_LOG_SEVERITY_TMP
   KEA_LOG_SEVERITY_TMP=$(echo "$KEA_LOG_SEVERITY_TMP" | tr '[:lower:]' '[:upper:]')
 
