@@ -97,6 +97,8 @@ build_image () {
     TAG="$KEA_IMAGE_TAG"
   fi
 
+  export DOCKER_BUILDKIT=1
+
   # shellcheck disable=SC2153
   docker build \
           -t "${KEA_IMAGE_REPO_URL}/${KEA_IMAGE_REPO_USERNAME}/${KEA_IMAGE_NAME}:${TAG}" \
