@@ -10,6 +10,7 @@ load_env_default
 action=${1:-}
 intact=${2:-1}
 aux=${3:-}
+aux2=${4:-}
 
 # Confirm with the user what action to take if not provided
 input_action
@@ -89,6 +90,7 @@ action_build () {
 
   version=${2:-0}
   target=${3:-runner}
+  use_cache=${4:-1}
 
   # Load the environment configuration
   load_env_config
@@ -109,7 +111,7 @@ action_build () {
   build_env_config
 
   # Build the Docker image
-  build_image "${KEA_VERSION}" "$target"
+  build_image "${KEA_VERSION}" "$target" "$use_cache"
 }
 
 action_push () {
@@ -309,7 +311,7 @@ elif [ "$action" == "prepare" ]; then
 
 elif [ "$action" == "build" ]; then
 
-  action_build "$intact" 0 "$aux"
+  action_build "$intact" 0 "$aux" "$aux2"
 
 elif [ "$action" == "push" ]; then
 
