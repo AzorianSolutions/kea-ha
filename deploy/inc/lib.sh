@@ -90,11 +90,16 @@ build_docker_compose () {
 
 build_image () {
   TAG="latest"
+  TARGET="runner"
 
   if [ "$1" != "" ]; then
     TAG="$1"
   elif [ "$KEA_IMAGE_TAG" != "" ]; then
     TAG="$KEA_IMAGE_TAG"
+  fi
+
+  if [ "$2" != "" ]; then
+    TARGET="$2"
   fi
 
   export DOCKER_BUILDKIT=1
@@ -103,7 +108,8 @@ build_image () {
   docker build \
           -t "${KEA_IMAGE_REPO_URL}/${KEA_IMAGE_REPO_USERNAME}/${KEA_IMAGE_NAME}:${TAG}" \
           -f deploy/docker/Dockerfile .\
-          --build-arg KHA_VERSION="${KHA_VERSION}" \
+          --target "${TARGET}" \
+          --no-cache \
           --build-arg KHA_SHARE_PATH="${KHA_SHARE_PATH}" \
           --build-arg KEA_VERSION="${KEA_VERSION}"
 }
