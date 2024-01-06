@@ -1,7 +1,6 @@
 FROM ubuntu:22.04 AS base
 RUN apt update
 RUN apt install -y --no-install-recommends \
-        gettext-base \
         ca-certificates \
         curl \
         wget \
@@ -13,22 +12,22 @@ ARG KEA_VERSION=2.5.4
 ENV DEBIAN_FRONTEND=noninteractive
 ENV KEA_VERSION=${KEA_VERSION}
 RUN apt install -y --no-install-recommends \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5 \
         autoconf \
         automake \
         make \
-        libboost-dev \
-        libboost-system-dev \
-        libssl-dev \
-        liblog4cplus-dev \
+        pkg-config \
         g++ \
         libtool \
-        pkg-config \
+        libssl-dev \
+        libboost-dev \
+        libboost-system-dev \
+        liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all
+        postgresql-server-dev-all \
+        liblog4cplus-2.0.5 \
+        libmysqlclient21 \
+        libpq5
 
 RUN mkdir -p /usr/src/kea && \
     cd /usr/src/kea && \
@@ -44,21 +43,22 @@ RUN autoreconf --install && \
     make install
 
 RUN apt-get purge -y --auto-remove \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5 \
         autoconf \
+        automake \
         make \
-        libboost-dev \
-        libboost-system-dev \
-        libssl-dev \
-        liblog4cplus-dev \
+        pkg-config \
         g++ \
         libtool \
-        pkg-config \
+        libssl-dev \
+        libboost-dev \
+        libboost-system-dev \
+        liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all && \
+        postgresql-server-dev-all \
+        liblog4cplus-2.0.5 \
+        libmysqlclient21 \
+        libpq5 && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -80,6 +80,7 @@ LABEL org.opencontainers.image.licenses="MIT"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt install -y --no-install-recommends \
+        gettext-base \
         supervisor \
         mysql-client \
         postgresql-client
