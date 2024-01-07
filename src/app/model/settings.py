@@ -14,10 +14,19 @@ class AppSettings(BaseSettings):
     """ Additional configuration settings loaded automatically from the YAML file given in the config_path setting. """
 
     config_path: str | Path = 'config.yml'
+    """ The path to the YAML file containing additional configuration settings. """
+
     debug: bool = False
+    """ Whether debug mode is enabled. """
+
     env_file: str | Path | None = None
+    """ The path to the environment file to load settings from. """
+
     env_file_encoding: str = 'UTF-8'
+    """ The file encoding of the environment file to load settings from. """
+
     env_secrets_dir: str | Path | None = None
+    """ The path to the secrets directory to load environment variable values from. """
 
     root_path: str | Path = Path(os.getcwd())
     """ The root path of the application which is typically the project repository root directory. """

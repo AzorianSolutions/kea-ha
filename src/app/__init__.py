@@ -16,7 +16,7 @@ DEFAULT_ENV_PATH: Path = ROOT_PATH / '.env'
 DEFAULT_ENV_FILE_ENCODING: str = 'UTF-8'
 """ The default file encoding of the environment file to load settings from. """
 
-DEFAULT_SECRETS_PATH: Path | None = None
+DEFAULT_SECRETS_PATH: Path | None = Path('/run/secrets')
 """ The default path to the secrets directory to load environment variable values from. """
 
 
@@ -43,6 +43,8 @@ def load_settings(env_prefix: str) -> AppSettings:
         'root_path': ROOT_PATH,
         'env_file': env_file_path,
         'env_file_encoding': env_file_encoding,
+        '_env_file': env_file_path,
+        '_env_file_encoding': env_file_encoding,
     }
 
     # Ensure any default values get pushed back into the environment
