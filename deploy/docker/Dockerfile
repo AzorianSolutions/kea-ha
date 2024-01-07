@@ -24,10 +24,7 @@ RUN apt install -y --no-install-recommends \
         liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5
+        postgresql-server-dev-all
 
 RUN mkdir -p /usr/src/kea && \
     cd /usr/src/kea && \
@@ -56,10 +53,7 @@ RUN apt-get purge -y --auto-remove \
         liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5 && \
+        postgresql-server-dev-all && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/src/kea
 
@@ -84,6 +78,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt install -y --no-install-recommends \
         gettext-base \
         supervisor \
+        liblog4cplus-2.0.5 \
+        libmysqlclient21 \
+        libpq5 \
         mysql-client \
         postgresql-client
 
@@ -92,6 +89,7 @@ RUN adduser --system --no-create-home --disabled-password --group kea
 WORKDIR ${KHA_SHARE_PATH}
 
 # Copy the Kea binaries, documentation, and source code into the container
+COPY --from=builder /etc/kea/ /etc/kea/
 COPY --from=builder /sbin/ /sbin/
 COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
