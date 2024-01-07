@@ -5,3 +5,47 @@ project:
     entrypoint: kea
   environment:
     prefix: KHA
+image:
+  repository:
+    url: docker.io
+    name: azoriansolutions/kea-ha
+    tag: latest
+  paths:
+    share: /usr/share/kea-ha
+  service:
+    interface: eth2
+kea:
+  version: 2.5.4
+  admin:
+    username: kea
+    password: kea
+  backend:
+    type: mysql
+    opts:
+      host: db
+      port: 3306
+      name: kea
+      username: kea
+      password: kea
+      root_password: kea
+  networking:
+    mgmt:
+      interface: eth1
+      ipv4:
+        address: 192.168.2.10
+        netmask: 24
+        gateway: 192.168.2.1
+    service:
+      interface: eth2
+      ipv4:
+        address: 192.168.251.1
+        netmask: 29
+        gateway: 192.168.251.6
+  logging:
+    severity: INFO
+    debuglevel: 0
+  ha:
+    enabled: false
+    mode: primary
+    peer:
+      address: 192.168.2.11

@@ -16,7 +16,7 @@ DEFAULT_ENV_PATH: Path = ROOT_PATH / '.env'
 DEFAULT_ENV_FILE_ENCODING: str = 'UTF-8'
 """ The default file encoding of the environment file to load settings from. """
 
-DEFAULT_SECRETS_PATH: Path | None = Path('/run/secrets')
+DEFAULT_SECRETS_PATH: Path | None = None
 """ The default path to the secrets directory to load environment variable values from. """
 
 

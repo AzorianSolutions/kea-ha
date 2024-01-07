@@ -44,12 +44,26 @@ class AppSettings(BaseSettings):
                 self._config = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
 
             if isinstance(self.config_path, Path | str) and Path(self.config_path).exists():
+                user_config = ConfigLoader.load_yaml(self.config_path)
+
+                if user_config is None:
+                    return self._config
+
                 if self._config is None:
-                    self._config = ConfigLoader.load_yaml(self.config_path)
+                    self._config = user_config
                 else:
-                    self._config.update(ConfigLoader.load_yaml(self.config_path))
+                    self._config.update(user_config)
 
         return self._config
+
+    def get_config(self, key: str, default: any = None) -> any:
+        """ Returns the configuration value for the given key, or the given default if not found. """
+        from functools import reduce
+        try:
+            result = reduce(lambda c, k: c[k] if not k.isnumeric() else c[int(k)], key.split('.'), self.config)
+        except (KeyError, TypeError):
+            result = default
+        return result
 
     class Config:
         env_prefix = base_config['project']['environment']['prefix'] + '_'
