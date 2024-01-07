@@ -1,12 +1,11 @@
 import typing
+import yaml
 from setuptools import setup
 
 config: dict[str, typing.Any] = {}
 
-with open('config.txt') as f:
-    for line in f.read().splitlines():
-        key, value = line.split('=')
-        config[key.strip().lower()] = value.strip()
+with open('defaults.yml') as f:
+    config.update(yaml.load(f, Loader=yaml.FullLoader))
     f.close()
 
 with open('requirements.txt') as f:
@@ -18,13 +17,13 @@ with open('README.md', 'r', encoding='utf-8') as f:
     f.close()
 
 setup(
-    name=config['name'],
-    version=config['version'],
+    name=config['project']['name'],
+    version=config['project']['version'],
     package_dir={'': 'src'},
     install_requires=required_packages,
     entry_points={
         'console_scripts': [
-            config['cmd_name'] + ' = app.cli.entry:cli',
+            config['cli']['entrypoint'] + ' = app.cli.entry:cli',
         ],
     },
     long_description=long_description,

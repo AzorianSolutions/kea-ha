@@ -1,7 +1,9 @@
 import click
 from loguru import logger
-from app.cli.core import Environment
-from app.cli.image import group
+from app.model.cli import Environment
+from app.cli.cmd.image import group
+
+import app
 from app.cli.entry import pass_environment
 
 
@@ -10,4 +12,4 @@ from app.cli.entry import pass_environment
 @pass_environment
 def purge(env: Environment, tag: str):
     """Purges the entire container image or just the given tag."""
-    logger.info(f'Purging the container image; tag: {tag}; debug: {env.settings.debug}')
+    logger.info(f'Purging the container image; tag: {tag}; debug: {app.settings.debug}')

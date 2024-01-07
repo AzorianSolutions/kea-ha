@@ -1,6 +1,6 @@
 import click
 import sys
-from app.config import AppSettings
+from app.model.settings import AppSettings
 
 
 class Environment:

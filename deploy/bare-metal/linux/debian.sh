@@ -8,8 +8,6 @@ install_venv=${3:-}
 
 system_packages='build-essential,python3,python3-dev,python3-pip,python3-venv'
 
-source 'config.txt'
-
 system_packages=$(echo "$system_packages" | tr ',' ' ')
 
 # shellcheck source=defaults.env

@@ -1,0 +1,7 @@
+project:
+  name: kea-ha
+  version: 0.1.0
+cli:
+  entrypoint: kea
+environment:
+  prefix: KHA

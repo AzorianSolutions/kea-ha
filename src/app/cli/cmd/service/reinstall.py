@@ -1,6 +1,6 @@
 import click
 from loguru import logger
-from app.cli.service import group
+from app.cli.cmd.service import group
 
 
 @group.command('reinstall')
