@@ -25,17 +25,18 @@ Kea HA deployments using Docker containers.
     - MySQL
     - Postgres
 
-## TL;DR
+## TL;DR - Ubuntu 22.04
 
-To get started quickly with a simple deployment, execute the following commands on a *nix based system
-with `bash` and `git` installed:
+To get started quickly with a simple deployment, execute the following commands on an `Ubuntu 22.04` based system
+with `git` installed:
 
 ```
 git clone https://github.com/AzorianSolutions/kea-ha.git
 cd kea-ha
 git checkout latest
-./ctrl.sh prepare
-./ctrl.sh install
+./deploy/bare-metal/linux/debian.sh
+source venv/bin/activate
+keaha
 ```
 
 ## [Project Documentation](https://github.com/AzorianSolutions/kea-ha/blob/main/docs/README.md)

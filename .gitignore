@@ -1,2 +1,7 @@
+.env
 .idea
+*.egg-info
+*.pyc
 build
+venv
+config.yml
