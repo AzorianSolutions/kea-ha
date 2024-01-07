@@ -89,7 +89,10 @@ build_docker_compose () {
 }
 
 build_image () {
+  TARGETS="base builder runner runner-dev"
   TAG="latest"
+  TARGET="runner"
+  USE_CACHE="1"
 
   if [ "$1" != "" ]; then
     TAG="$1"
@@ -97,15 +100,36 @@ build_image () {
     TAG="$KEA_IMAGE_TAG"
   fi
 
+  if [ "$2" != "" ]; then
+    TARGET="$2"
+  fi
+
+  if [ "$3" == "0" ]; then
+    USE_CACHE="0"
+  fi
+
+  SUFFIX=""
+
+  # If the TARGET is in TARGETS, then append the --target flag to the build command
+  # shellcheck disable=SC2046
+  if [ $(contains "$TARGETS" "$TARGET"; echo "$?") ]; then
+    SUFFIX="${SUFFIX} --target ${TARGET}"
+  fi
+
+  # If USE_CACHE=0, then append the --no-cache flag to the build command
+  if [ "$USE_CACHE" == "0" ]; then
+    SUFFIX="${SUFFIX} --no-cache"
+  fi
+
   export DOCKER_BUILDKIT=1
 
-  # shellcheck disable=SC2153
+  # shellcheck disable=SC2153,SC2086
   docker build \
           -t "${KEA_IMAGE_REPO_URL}/${KEA_IMAGE_REPO_USERNAME}/${KEA_IMAGE_NAME}:${TAG}" \
           -f deploy/docker/Dockerfile .\
-          --build-arg KHA_VERSION="${KHA_VERSION}" \
           --build-arg KHA_SHARE_PATH="${KHA_SHARE_PATH}" \
-          --build-arg KEA_VERSION="${KEA_VERSION}"
+          --build-arg KEA_VERSION="${KEA_VERSION}" \
+          ${SUFFIX}
 }
 
 tag_image () {

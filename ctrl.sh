@@ -9,6 +9,8 @@ load_env_default
 
 action=${1:-}
 intact=${2:-1}
+aux=${3:-}
+aux2=${4:-}
 
 # Confirm with the user what action to take if not provided
 input_action
@@ -86,7 +88,9 @@ action_build () {
     interactive=1
   fi
 
-  version=${2:-}
+  version=${2:-0}
+  target=${3:-runner}
+  use_cache=${4:-1}
 
   # Load the environment configuration
   load_env_config
@@ -95,7 +99,7 @@ action_build () {
   if [ "$interactive" == "1" ] && [ "$version" == "" ]; then
     # Prompt the user to configure the Kea version
     input_kea_version
-  elif [ "$version" == "" ]; then
+  elif [ "$version" == "" ] || [ "$version" == "0" ]; then
     # Set the version to the default value
     version="${KEA_VERSION}"
   else
@@ -107,7 +111,7 @@ action_build () {
   build_env_config
 
   # Build the Docker image
-  build_image "${KEA_VERSION}"
+  build_image "${KEA_VERSION}" "$target" "$use_cache"
 }
 
 action_push () {
@@ -307,7 +311,7 @@ elif [ "$action" == "prepare" ]; then
 
 elif [ "$action" == "build" ]; then
 
-  action_build "$intact"
+  action_build "$intact" 0 "$aux" "$aux2"
 
 elif [ "$action" == "push" ]; then
 
