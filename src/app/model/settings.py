@@ -1,14 +1,14 @@
+import os
 from pathlib import Path
 from pydantic.fields import FieldInfo
 from pydantic_settings import (
     EnvSettingsSource, BaseSettings, PydanticBaseSettingsSource
 )
 from typing import Any, Type, Tuple
-
-from app import (
-    ROOT_PATH, DEFAULT_CONFIG_PATH, DEFAULT_ENV_PATH, DEFAULT_ENV_FILE_ENCODING, DEFAULT_SECRETS_PATH, base_config
-)
 from app.util.config import ConfigLoader
+
+DEFAULT_CONFIG_PATH: Path = Path('defaults.yml')
+base_config: dict = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
 
 
 class SettingsSource(EnvSettingsSource):
@@ -16,6 +16,10 @@ class SettingsSource(EnvSettingsSource):
             self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
     ) -> Any:
         path_fields = ['config_path', 'env_file', 'env_secrets_dir', 'root_path']
+
+        if field_name == 'root_path' and value in ['.', './']:
+            print('TEST TEST TEST')
+            value = Path(os.getcwd())
 
         if field_name in path_fields and value is not None and not isinstance(value, Path):
             value = Path(value)
@@ -29,17 +33,16 @@ class AppSettings(BaseSettings):
     _config: dict | None = None
     """ Additional configuration settings loaded automatically from the YAML file given in the config_path setting. """
 
-    config_path: str | Path = ROOT_PATH / 'config.yml'
-    debug: bool = False
-    env_file: str | Path = DEFAULT_ENV_PATH
-    env_file_encoding: str = DEFAULT_ENV_FILE_ENCODING
-    env_secrets_dir: str | Path | None = DEFAULT_SECRETS_PATH if DEFAULT_SECRETS_PATH is not None else None
-    root_path: str | Path = ROOT_PATH
+    _root_path: Path = Path(os.getcwd())
+    """ The root path of the application which is typically the project repository root directory. """
 
+    config_path: str | Path = 'config.yml'
+    debug: bool = False
+    env_file: str | Path = '.env'
+    env_file_encoding: str = 'UTF-8'
+    env_secrets_dir: str | Path | None = None
     version: str = base_config['project']['version']
     """ The application version number """
-
-    """ The following settings are automatically loaded at application startup. """
 
     @property
     def config(self) -> dict[str, Any]:
@@ -58,8 +61,13 @@ class AppSettings(BaseSettings):
 
         return self._config
 
+    @property
+    def root_path(self) -> Path:
+        """ Returns the root path of the application which is typically the project repository root directory. """
+        return self._root_path
+
     class Config:
-        env_prefix = base_config['environment']['prefix'] + '_'
+        env_prefix = base_config['project']['environment']['prefix'] + '_'
         env_nested_delimiter = '__'
 
     @classmethod

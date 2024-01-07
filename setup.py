@@ -23,7 +23,7 @@ setup(
     install_requires=required_packages,
     entry_points={
         'console_scripts': [
-            config['cli']['entrypoint'] + ' = app.cli.entry:cli',
+            config['project']['cli']['entrypoint'] + ' = app.cli.entry:cli',
         ],
     },
     long_description=long_description,

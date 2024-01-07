@@ -31,15 +31,15 @@ def load_settings(env_file_path: str | Path | None = None, env_file_encoding: st
 
     # Extract the default environment file path from the environment if defined, otherwise use the default path
     if env_file_path is None:
-        env_file_path = os.getenv(f'{base_config["environment"]["prefix"]}_ENV_FILE', DEFAULT_ENV_PATH)
+        env_file_path = os.getenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_FILE', DEFAULT_ENV_PATH)
 
     # Extract the default environment file encoding from the environment if defined, otherwise use the default value
     if env_file_encoding is None:
-        env_file_encoding = os.getenv(f'{base_config["environment"]["prefix"]}_ENV_FILE_ENCODING', DEFAULT_ENV_FILE_ENCODING)
+        env_file_encoding = os.getenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_FILE_ENCODING', DEFAULT_ENV_FILE_ENCODING)
 
     # Extract the default secrets directory path from the environment if defined, otherwise use the default path
     if secrets_path is None:
-        secrets_path = os.getenv(f'{base_config["environment"]["prefix"]}_ENV_SECRETS_DIR', DEFAULT_SECRETS_PATH)
+        secrets_path = os.getenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_SECRETS_DIR', DEFAULT_SECRETS_PATH)
 
     if env_file_path is not None and not isinstance(env_file_path, Path):
         env_file_path = Path(env_file_path)
@@ -52,8 +52,8 @@ def load_settings(env_file_path: str | Path | None = None, env_file_encoding: st
         '_env_file_encoding': env_file_encoding,
     }
 
-    os.putenv(f'{base_config["environment"]["prefix"]}_ENV_FILE', str(env_file_path))
-    os.putenv(f'{base_config["environment"]["prefix"]}_ENV_FILE_ENCODING', env_file_encoding)
+    os.putenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_FILE', str(env_file_path))
+    os.putenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_FILE_ENCODING', env_file_encoding)
 
     if secrets_path is not None:
         valid: bool = True
@@ -67,7 +67,7 @@ def load_settings(env_file_path: str | Path | None = None, env_file_encoding: st
 
         if valid:
             params['_secrets_dir'] = secrets_path
-            os.putenv(f'{base_config["environment"]["prefix"]}_ENV_SECRETS_DIR', str(secrets_path))
+            os.putenv(f'{base_config["project"]["environment"]["prefix"]}_ENV_SECRETS_DIR', str(secrets_path))
 
     # Load base app configuration settings from the given environment file and the local environment
     app_settings = AppSettings(**params)

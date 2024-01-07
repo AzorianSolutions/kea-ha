@@ -1,10 +1,10 @@
 import click
 from loguru import logger
-from app.cli.cmd.service import group
+from . import group
 
 
 @group.command('stop')
 @click.pass_context
-def stop(ctx):
+def command(ctx):
     """Stops the container services."""
     logger.info(f'Stopping the container services...')

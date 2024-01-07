@@ -1,8 +1,27 @@
+import os
 import click
+from glob import glob
+from pathlib import Path
 from app import settings
 from app.model.cli import Environment
 
 pass_environment = click.make_pass_decorator(Environment, ensure=True)
+
+
+def import_commands():
+    """ Loads all commands from the commands folder. """
+    import importlib
+
+    base_path: Path = Path(os.path.dirname(__file__))
+    cmd_path: Path = base_path / 'cmd'
+
+    for path in glob(os.path.join(cmd_path, '**/*.py'), recursive=True):
+        name = os.path.basename(path)[:-3]
+        relative_path = Path(path).relative_to(settings.root_path)
+        import_path = '.'.join(relative_path.parts[1:])[:-3]
+
+        if name != '__init__':
+            importlib.import_module(import_path)
 
 
 @click.group()
@@ -18,6 +37,5 @@ def cli(env: Environment, debug: bool):
     # Cache a reference to the app's settings within the environment and context.
     env.settings = settings
 
-from app.cli.cmd.config import group as config_group
-from app.cli.cmd.image import group as image_group
-from app.cli.cmd.service import group as service_group
+
+import_commands()

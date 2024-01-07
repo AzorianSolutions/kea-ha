@@ -1,10 +1,10 @@
 import click
 from loguru import logger
-from app.cli.cmd.service import group
+from . import group
 
 
 @group.command('start')
 @click.pass_context
-def start(ctx):
+def command(ctx):
     """Starts the container services."""
     logger.info(f'Starting the container services...')
