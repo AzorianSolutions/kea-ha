@@ -65,10 +65,10 @@ RUN apt-get purge -y --auto-remove \
 
 
 FROM base AS runner
-ARG KHA_SHARE_PATH=/usr/share/kea-ha
+ARG KHA_ROOT=/opt/kha
 ARG KEA_VERSION=2.5.4
 ENV DEBIAN_FRONTEND=noninteractive
-ENV KHA_SHARE_PATH=${KHA_SHARE_PATH}
+ENV KHA_ROOT=${KHA_ROOT}
 ENV KEA_VERSION=${KEA_VERSION}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -81,7 +81,7 @@ RUN apt install -y --no-install-recommends \
 
 RUN adduser --system --no-create-home --disabled-password --group kea
 
-WORKDIR ${KHA_SHARE_PATH}
+WORKDIR ${KHA_ROOT}
 
 # Copy the Kea binaries, documentation, and source code into the container
 COPY --from=builder /sbin/ /sbin/
@@ -89,16 +89,13 @@ COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
 COPY --from=builder /share/kea /share/kea
 
-# Copy the default environment settings into the container
-COPY defaults.env ${KHA_SHARE_PATH}/defaults.env
-
 # Create the entrypoint script in the container
 COPY deploy/docker/entrypoint.sh /entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +rwx /entrypoint.sh
 
-VOLUME ["/etc/kea", "${KHA_SHARE_PATH}", "/var/lib/kea", "/var/log/kea", "/var/log/supervisor"]
+VOLUME ["/var/log/kea", "/var/log/supervisor"]
 
 EXPOSE 8000-8001/tcp 67/tcp 67/udp
 

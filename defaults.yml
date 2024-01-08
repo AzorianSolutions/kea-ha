@@ -34,7 +34,7 @@ image:
     context: .
     dockerfile: deploy/docker/Dockerfile
     args:
-      - KHA_SHARE_PATH=$c{image/paths/share}
+      - KHA_ROOT=$c{service/paths/kha/root}
       - KEA_VERSION=$c{kea/version}
 service:
   name: kea-ha
