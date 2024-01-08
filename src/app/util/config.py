@@ -223,6 +223,11 @@ class ConfigUtil:
 
         for key, value in config.items():
             key = key.upper()
+
+            # Test the key with a regex to ensure it is a valid environment variable name
+            if not re.match(r'^[A-Z_][A-Z0-9_]*$', key):
+                continue
+
             if isinstance(value, dict):
                 result.update(ConfigUtil.flatten(value, f'{prefix}{key}__'))
             else:

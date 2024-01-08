@@ -6,9 +6,6 @@ from app.util.console import Run
 from . import group
 
 
-@group.command('uninstall')
-@confirm_option
-@pass_environment
 def command(env: Environment, yes: bool):
     """Uninstalls the container services."""
 
@@ -32,3 +29,11 @@ def command(env: Environment, yes: bool):
         return
 
     logger.success(f'Uninstalled the container services.')
+
+
+@group.command('uninstall')
+@confirm_option
+@pass_environment
+def wrapper(env: Environment, yes: bool):
+    """Installs the container services."""
+    return command(env, yes)
