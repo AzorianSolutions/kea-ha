@@ -5,7 +5,7 @@
 config.yml
 docker-compose.yml
 build
-etc/*
-usr/*
-var/*
+etc
+usr
+var
 venv
