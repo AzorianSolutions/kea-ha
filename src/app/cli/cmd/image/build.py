@@ -2,6 +2,7 @@ import click
 import os
 from docker.errors import APIError, BuildError
 from loguru import logger
+from pathlib import Path
 from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
 from app.model.images import ImageRepo
@@ -76,14 +77,17 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     if isinstance(config_hosts := env.settings.c('image/hosts'), dict):
         hosts.update(config_hosts)
 
+    dockerfile: Path = Path(env.settings.c('image/build/dockerfile'))
+    build_context: Path = dockerfile.parent
+
     command_args: dict = {
-        'path': str(env.settings.root_path),
-        'dockerfile': env.settings.c('image/build/dockerfile'),
+        'path': str(build_context),
+        'dockerfile': dockerfile.name,
         'tag': repo.repo_path,
         'nocache': no_cache,
-        'buildargs': build_args,
         'labels': labels,
         'extra_hosts': hosts,
+        'buildargs': build_args,
         'network_mode': 'host',
         'encoding': 'utf-8',
         'rm': True,

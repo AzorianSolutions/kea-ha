@@ -6,26 +6,11 @@ DB_USER=root
 DB_PASSWORD="${KEA__BACKEND__OPTS__ROOT_PASSWORD}"
 
 configure_kea_admin () {
-  if [ "${KEA__BACKEND__TYPE}" == "postgresql" ]; then
+  if [ "${KEA__BACKEND__TYPE}" == "pgsql" ]; then
+    DB_BACKEND="postgresql"
     DB_USER="${KEA__BACKEND__OPTS__USERNAME}"
     DB_PASSWORD="${KEA__BACKEND__OPTS__PASSWORD}"
   fi
-}
-
-initialize_app () {
-  # Set up Kea
-  mkdir -p /etc/kea
-  mkdir -p /var/lib/kea
-  mkdir -p /var/log/kea
-  mkdir -p /var/run/kea
-  # chown -R kea:kea /etc/kea
-  # chown -R kea:kea /var/lib/kea
-  # chown -R kea:kea /var/log/kea
-  # chown -R kea:kea /var/run/kea
-  
-  # Set up Supervisor
-  mkdir -p /var/log/supervisor/
-  # chown -R root:root /var/log/supervisor/
 }
 
 initialize_db () {
@@ -43,11 +28,6 @@ upgrade_db () {
   # run the databaser upgrade process provided by the kea-admin tool
   kea-admin db-upgrade "${DB_BACKEND}" -h "${KEA__BACKEND__OPTS__HOST}" -P "${KEA__BACKEND__OPTS__PORT}" -u "${DB_USER}" -p "${DB_PASSWORD}" -n "${KEA__BACKEND__OPTS__NAME}"
 }
-
-echo "Initializing application environment..."
-
-# Initialize the application environment
-initialize_app
 
 # If using the MySQL engine, then check if the kea database exists. If not, create it.
 if [ "$KEA__BACKEND__TYPE" == "mysql" ]; then

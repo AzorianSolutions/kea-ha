@@ -18,13 +18,11 @@ services:
       - NET_ADMIN
       - NET_RAW
     privileged: true
+    user: $c{image/uid}:$c{image/gid}
     volumes:
-      - $c{service/paths/kha/root}:$c{service/paths/kha/root}
       - $c{service/paths/kea/config}:/etc/kea
-      - $c{service/paths/kea/lib}:/var/lib/kea
       - $c{service/paths/kea/log}:/var/log/kea
-      - $c{service/paths/kea/run}:/var/run/kea
-      - $c{service/paths/kea/tmp}:/var/tmp/kea
+      - $c{service/paths/supervisor/config}:/etc/supervisor
       - $c{service/paths/supervisor/log}:/var/log/supervisor
     networks:
       db0:

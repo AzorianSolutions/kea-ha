@@ -39,6 +39,14 @@ def command(env: Environment, yes: bool):
 
     env_file = Path(env.settings.c('service/paths/compose/env'))
 
+    if not env_file.parent.exists():
+        if not os.access(env_file.parent, os.W_OK):
+            logger.error(f'No write permission to environment file path: {env_file.parent}')
+            return
+
+        logger.debug(f'Creating the environment file path: {env_file.parent}')
+        env_file.parent.mkdir(parents=True)
+
     # Save the service environment file if the path is writable
     if env_file.exists() and not os.access(env_file, os.W_OK):
         logger.error(f'No write permission to existing environment file: {env_file}')
@@ -47,7 +55,7 @@ def command(env: Environment, yes: bool):
     # Build the services environment file
     file_contents = ConfigBuilder.build_env_file(env.settings.config)
 
-    with open(env_file, 'w') as f:
+    with open(env_file, 'w+') as f:
         f.write(file_contents)
         f.close()
 
@@ -63,6 +71,14 @@ def command(env: Environment, yes: bool):
         return
 
     compose_file = Path(env.settings.c('service/paths/compose/file'))
+
+    if not compose_file.parent.exists():
+        if not os.access(compose_file.parent, os.W_OK):
+            logger.error(f'No write permission to compose file path: {compose_file.parent}')
+            return
+
+        logger.debug(f'Creating the compose file path: {compose_file.parent}')
+        compose_file.parent.mkdir(parents=True)
 
     with open(compose_file, 'w') as f:
         f.write(template)

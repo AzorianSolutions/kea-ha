@@ -11,6 +11,10 @@ host:
     prepare: ca-certificates curl gnupg lsb-release
     payload: docker-ce docker-ce-cli containerd.io net-tools
 image:
+  uid: 0
+  user: root
+  gid: 0
+  group: root
   repository:
     url: docker.io
     name: azoriansolutions/kea-ha
@@ -34,14 +38,16 @@ image:
     context: .
     dockerfile: deploy/docker/Dockerfile
     args:
-      - KHA_ROOT=$c{service/paths/kha/root}
+      - KHA_UID=$c{image/uid}
+      - KHA_USER=$c{image/user}
+      - KHA_GID=$c{image/gid}
+      - KHA_GROUP=$c{image/group}
       - KEA_VERSION=$c{kea/version}
+      - KHA_ROOT=$c{service/paths/kha/root}
 service:
   name: kea-ha
-  user: kea
-  group: kea
   environment:
-      prefix: KHA
+    prefix: KHA
   paths:
     kha:
       root: /opt/kha
@@ -76,9 +82,9 @@ service:
       http: 8000
       supervisor: 8001
     udp:
-      # If you want to make the Kea DHCP4 server available for to relays on the host network,
-      # uncomment the following line:
-      # dhcp: 67
+    # If you want to make the Kea DHCP4 server available for to relays on the host network,
+    # uncomment the following line:
+    # dhcp: 67
   networking:
     mgmt:
       interface: eth1

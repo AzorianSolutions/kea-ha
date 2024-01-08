@@ -24,10 +24,7 @@ RUN apt install -y --no-install-recommends \
         liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5
+        postgresql-server-dev-all
 
 RUN mkdir -p /usr/src/kea && \
     cd /usr/src/kea && \
@@ -56,18 +53,23 @@ RUN apt-get purge -y --auto-remove \
         liblog4cplus-dev \
         libmysqlclient-dev \
         libpq-dev \
-        postgresql-server-dev-all \
-        liblog4cplus-2.0.5 \
-        libmysqlclient21 \
-        libpq5 && \
+        postgresql-server-dev-all && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/src/kea
 
 
 FROM base AS runner
+ARG KHA_UID=0
+ARG KHA_USER=root
+ARG KHA_GID=0
+ARG KHA_GROUP=root
 ARG KHA_ROOT=/opt/kha
 ARG KEA_VERSION=2.5.4
 ENV DEBIAN_FRONTEND=noninteractive
+ENV KHA_UID=${KHA_UID}
+ENV KHA_USER=${KHA_USER}
+ENV KHA_GID=${KHA_GID}
+ENV KHA_GROUP=${KHA_GROUP}
 ENV KHA_ROOT=${KHA_ROOT}
 ENV KEA_VERSION=${KEA_VERSION}
 
@@ -77,9 +79,10 @@ RUN apt install -y --no-install-recommends \
         gettext-base \
         supervisor \
         mysql-client \
-        postgresql-client
-
-RUN adduser --system --no-create-home --disabled-password --group kea
+        postgresql-client \
+        liblog4cplus-2.0.5 \
+        libmysqlclient21 \
+        libpq5
 
 WORKDIR ${KHA_ROOT}
 
@@ -89,25 +92,46 @@ COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
 COPY --from=builder /share/kea /share/kea
 
-# Create the entrypoint script in the container
-COPY deploy/docker/entrypoint.sh /entrypoint.sh
+# Copy the Kea-HA tools into the container
+COPY * ./
 
-# Make the entrypoint script executable
-RUN chmod +rwx /entrypoint.sh
+# Copy the entrypoint script into the container
+COPY ./entrypoint.sh /entrypoint.sh
 
-VOLUME ["/var/log/kea", "/var/log/supervisor"]
-
-EXPOSE 8000-8001/tcp 67/tcp 67/udp
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-HEALTHCHECK CMD [ "supervisorctl", "status" ]
+# Create service directories and update permissions
+RUN mkdir -p /etc/kea && \
+    mkdir -p /var/lib/kea && \
+    mkdir -p /var/log/kea && \
+    mkdir -p /var/run/kea && \
+    mkdir -p /var/log/supervisor/ && \
+    # Update service permissions \
+    chmod +x /entrypoint.sh && \
+    chown -R ${KHA_UID}:${KHA_GID} /entrypoint.sh && \
+    chown -R ${KHA_UID}:${KHA_GID} /etc/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/lib/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/log/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/run/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/log/supervisor
 
 
 FROM runner AS runner-dev
+ARG KHA_UID=0
+ARG KHA_GID=0
+ENV DEBIAN_FRONTEND=noninteractive
+ENV KHA_UID=${KHA_UID}
+ENV KHA_GID=${KHA_GID}
+
 RUN apt install -y --no-install-recommends \
         lsof \
         iproute2 \
         net-tools \
         iputils-ping \
         iptraf
+
+USER ${KHA_UID}:${KHA_GID}
+
+EXPOSE 8000-8001/tcp 67/tcp 67/udp
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+HEALTHCHECK CMD [ "supervisorctl", "status" ]
