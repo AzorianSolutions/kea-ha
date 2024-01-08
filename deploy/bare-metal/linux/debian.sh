@@ -55,5 +55,6 @@ if [ "$install_venv" == "1" ]; then
     rm -fr venv
     python3 -m venv venv
     source venv/bin/activate
+    pip install pyyaml
     pip install -e .
 fi

@@ -31,7 +31,7 @@ class AppSettings(BaseSettings):
     root_path: str | Path = Path(os.getcwd())
     """ The root path of the application which is typically the project repository root directory. """
 
-    version: str = base_config['project']['version']
+    version: str = base_config['app']['version']
     """ The application version number """
 
     @property
@@ -66,5 +66,5 @@ class AppSettings(BaseSettings):
         return result
 
     class Config:
-        env_prefix = base_config['project']['environment']['prefix'] + '_'
+        env_prefix = base_config['app']['environment']['prefix'] + '_'
         env_nested_delimiter = '__'

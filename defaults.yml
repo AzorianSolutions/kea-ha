@@ -1,10 +1,15 @@
-project:
+app:
   name: kea-ha
   version: 0.1.0
   cli:
     entrypoint: kea
   environment:
     prefix: KHA
+    file: .env
+host:
+  packages:
+    prepare: ca-certificates curl gnupg lsb-release
+    payload: docker-ce docker-ce-cli containerd.io net-tools
 image:
   repository:
     url: docker.io

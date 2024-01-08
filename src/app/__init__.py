@@ -71,4 +71,4 @@ def load_settings(env_prefix: str) -> AppSettings:
 
 base_config: dict[str, typing.Any] = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
 
-settings: AppSettings = load_settings(env_prefix=base_config['project']['environment']['prefix'])
+settings: AppSettings = load_settings(env_prefix=base_config['app']['environment']['prefix'])

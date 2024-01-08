@@ -1,8 +1,7 @@
-import typing
 import yaml
 from setuptools import setup
 
-config: dict[str, typing.Any] = {}
+config = {}
 
 with open('defaults.yml') as f:
     config.update(yaml.load(f, Loader=yaml.FullLoader))
@@ -17,13 +16,13 @@ with open('README.md', 'r', encoding='utf-8') as f:
     f.close()
 
 setup(
-    name=config['project']['name'],
-    version=config['project']['version'],
+    name=config['app']['name'],
+    version=config['app']['version'],
     package_dir={'': 'src'},
     install_requires=required_packages,
     entry_points={
         'console_scripts': [
-            config['project']['cli']['entrypoint'] + ' = app.cli.entry:cli',
+            config['app']['cli']['entrypoint'] + ' = app.cli.entry:cli',
         ],
     },
     long_description=long_description,

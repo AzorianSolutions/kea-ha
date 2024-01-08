@@ -24,6 +24,13 @@ def import_commands():
             importlib.import_module(import_path)
 
 
+def confirm_option(function):
+    """ A decorator that adds a confirmation prompt to the command. """
+    prompt = 'Automatically answer yes to all prompts.'
+    function = click.option('-y', '--yes', is_flag=True, default=False, help=prompt)(function)
+    return function
+
+
 @click.group()
 @click.version_option(settings.version, '-V', '--version', message='%(version)s')
 @click.option('-d', '--debug', default=settings.debug, is_flag=True, help='Enables debug mode.')

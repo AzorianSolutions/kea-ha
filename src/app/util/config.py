@@ -4,6 +4,23 @@ import yaml
 from pathlib import Path
 
 
+class ConfigUtil:
+    """A class for working with configuration related data and files."""
+
+    @staticmethod
+    def flatten(config: dict[str, typing.Any], prefix: str = '') -> dict[str, typing.Any]:
+        result: dict[str, typing.Any] = {}
+
+        for key, value in config.items():
+            key = key.upper()
+            if isinstance(value, dict):
+                result.update(ConfigUtil.flatten(value, f'{prefix}{key}_'))
+            else:
+                result[f'{prefix}{key}'] = value
+
+        return result
+
+
 class ConfigLoader:
     """A class for loading simple configuration settings from a text file."""
 
@@ -57,3 +74,29 @@ class ConfigLoader:
             pass
 
         return config
+
+
+class ConfigBuilder:
+    """A class for building configuration files."""
+
+    @staticmethod
+    def build_env_file(config: dict) -> str:
+        """Builds a .env style file from the given configuration dictionary."""
+        env_file: str = ''
+        env_config = ConfigUtil.flatten(config)
+
+        for key, value in env_config.items():
+            if isinstance(value, bool):
+                value = str(value).lower()
+            elif isinstance(value, list):
+                value = ','.join(value)
+            elif isinstance(value, dict):
+                value = ','.join([f'{k}:{v}' for k, v in value.items()])
+            elif isinstance(value, str):
+                value = value.strip()
+                if ' ' in value:
+                    value = f'"{value}"'
+
+            env_file += f'{key}={value}\n'
+
+        return env_file
