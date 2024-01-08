@@ -92,9 +92,6 @@ COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
 COPY --from=builder /share/kea /share/kea
 
-# Copy the Kea-HA tools into the container
-COPY * ./
-
 # Copy the entrypoint script into the container
 COPY ./entrypoint.sh /entrypoint.sh
 
