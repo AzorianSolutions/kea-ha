@@ -2,7 +2,7 @@ import click
 import os
 from docker.errors import APIError, BuildError
 from loguru import logger
-from app.cli.entry import pass_environment
+from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
 from app.model.images import ImageRepo
 from . import group
@@ -14,7 +14,7 @@ HLP_ARG_TAG = 'The image path, optionally including the repository URL, image na
 
 
 @group.command('build')
-@click.option('-y', '--yes', is_flag=True, default=False, help=HLP_OPT_YES)
+@confirm_option
 @click.option('-nc', '--no-cache', is_flag=True, default=False, help=HLP_OPT_NO_CACHE)
 @click.option('-s', '--stage', default=None, help=HLP_OPT_STAGE)
 @click.argument('tag', default=None, required=False, metavar=HLP_ARG_TAG)
