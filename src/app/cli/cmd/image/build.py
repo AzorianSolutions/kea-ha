@@ -26,10 +26,10 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     if tag:
         repo = ImageRepo.from_tag(tag)
     else:
-        meta = env.settings.c('image__repository')
+        meta = env.settings.c('image/repository')
         repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
 
-    version: str = env.settings.c('kea__version')
+    version: str = env.settings.c('kea/version')
 
     if not yes:
         confirm = click.confirm('Are you sure you want to build the container image?', default=None)
@@ -40,7 +40,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
         click.echo('What version of the Kea software would you like to build?\n')
 
-        version_input = click.prompt('Kea Version', default=env.settings.c('kea__version'))
+        version_input = click.prompt('Kea Version', default=env.settings.c('kea/version'))
 
         if version_input:
             version = version_input
@@ -55,26 +55,26 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     build_args: dict = {}
 
     # Attempt to load additional build arguments from the configuration
-    if isinstance(config_build_args := env.settings.c('image__build__args'), dict):
+    if isinstance(config_build_args := env.settings.c('image/build/args'), dict):
         build_args.update(config_build_args)
 
     # Additional labels added to the container image
     labels: dict = {}
 
     # Attempt to load additional image labels from the configuration
-    if isinstance(config_labels := env.settings.c('image__labels'), dict):
+    if isinstance(config_labels := env.settings.c('image/labels'), dict):
         labels.update(config_labels)
 
     # Additional host entries added to the container's `/etc/hosts` file
     hosts: dict = {}
 
     # Attempt to load additional host entries from the configuration
-    if isinstance(config_hosts := env.settings.c('image__hosts'), dict):
+    if isinstance(config_hosts := env.settings.c('image/hosts'), dict):
         hosts.update(config_hosts)
 
     command_args: dict = {
         'path': str(env.settings.root_path),
-        'dockerfile': env.settings.c('image__build__dockerfile'),
+        'dockerfile': env.settings.c('image/build/dockerfile'),
         'tag': repo.repo_path,
         'nocache': no_cache,
         'target': stage,

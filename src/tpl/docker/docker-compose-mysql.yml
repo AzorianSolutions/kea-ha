@@ -1,20 +1,20 @@
 services:
   db:
-    image: mysql:${KEA__BACKEND__OPTS__VERSION}
+    image: mysql:$c{kea/backend/opts/version}
     restart: unless-stopped
     command: --default-authentication-plugin=caching_sha2_password
     volumes:
-      - ${SERVICE__PATHS__DB__DATA}:/var/lib/mysql
+      - $c{service/paths/db/data}:/var/lib/mysql
     networks:
       - db0
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_ROOT_PASSWORD=${KEA__BACKEND__OPTS__ROOT_PASSWORD}
-      - MYSQL_DATABASE=${KEA__BACKEND__OPTS__NAME}
-      - MYSQL_USER=${KEA__BACKEND__OPTS__USERNAME}
-      - MYSQL_PASSWORD=${KEA__BACKEND__OPTS__PASSWORD}
+      - MYSQL_ROOT_PASSWORD=$c{kea/backend/opts/root_password}
+      - MYSQL_DATABASE=$c{kea/backend/opts/name}
+      - MYSQL_USER=$c{kea/backend/opts/username}
+      - MYSQL_PASSWORD=$c{kea/backend/opts/password}
   kea:
-    image: ${IMAGE__REPOSITORY__URL}/${IMAGE__REPOSITORY__NAME}:${IMAGE__REPOSITORY__TAG}
+    image: $c{image/repository/url}/$c{image/repository/name}:$c{image/repository/tag}
     restart: unless-stopped
     depends_on: [ db ]
     cap_add:
@@ -22,24 +22,23 @@ services:
       - NET_RAW
     privileged: true
     volumes:
-      - ${SERVICE__PATHS__KHA__ROOT}:${SERVICE__PATHS__KHA__ROOT}
-      - ${SERVICE__PATHS__KEA__CONFIG}:/etc/kea
-      - ${SERVICE__PATHS__KEA__LIB}:/var/lib/kea
-      - ${SERVICE__PATHS__KEA__LOG}:/var/log/kea
-      - ${SERVICE__PATHS__KEA__RUN}:/var/run/kea
-      - ${SERVICE__PATHS__KEA__TMP}:/var/tmp/kea
-      - ${SERVICE__PATHS__SUPERVISOR__LOG}:/var/log/supervisor
-      - ${SERVICE__PATHS__KHA__ROOT}/deploy/tpl:${IMAGE__PATHS__SHARE}/tpl
+      - $c{service/paths/kha/root}:$c{service/paths/kha/root}
+      - $c{service/paths/kea/config}:/etc/kea
+      - $c{service/paths/kea/lib}:/var/lib/kea
+      - $c{service/paths/kea/log}:/var/log/kea
+      - $c{service/paths/kea/run}:/var/run/kea
+      - $c{service/paths/kea/tmp}:/var/tmp/kea
+      - $c{service/paths/supervisor/log}:/var/log/supervisor
     networks:
       db0:
       mgmt0:
-        ipv4_address: ${SERVICE__NETWORKING__MGMT__IPV4__ADDRESS}
+        ipv4_address: $c{service/networking/mgmt/ipv4/address}
       subdhcp0:
-        ipv4_address: ${SERVICE__NETWORKING__SERVICE__IPV4__ADDRESS}
+        ipv4_address: $c{service/networking/service/ipv4/address}
     ports:
-      - ${SERVICE__PORTS__TCP__HTTP}:${SERVICE__PORTS__TCP__HTTP}
+      - $c{service/ports/tcp/http}:$c{service/ports/tcp/http}
     env_file:
-      - build/.env
+      - .env
 networks:
   db0:
     name: db0
@@ -49,20 +48,20 @@ networks:
     driver: ipvlan
     driver_opts:
       ipvlan_mode: l2
-      parent: ${SERVICE__NETWORKING__MGMT__INTERFACE}
+      parent: $c{service/networking/mgmt/interface}
     ipam:
       driver: default
       config:
-          - subnet: "${SERVICE__NETWORKING__MGMT__IPV4__ADDRESS}/${SERVICE__NETWORKING__MGMT__IPV4__NETMASK"
-            gateway: "${SERVICE__NETWORKING__MGMT__IPV4__GATEWAY}"
+        - subnet: $c{service/networking/mgmt/ipv4/address}/$c{service/networking/mgmt/ipv4/netmask}
+          gateway: $c{service/networking/mgmt/ipv4/gateway}
   subdhcp0:
     name: subdhcp0
     driver: ipvlan
     driver_opts:
       ipvlan_mode: l2
-      parent: ${SERVICE__NETWORKING__SERVICE__INTERFACE}
+      parent: $c{service/networking/service/interface}
     ipam:
       driver: default
       config:
-          - subnet: "${SERVICE__NETWORKING__SERVICE__IPV4__ADDRESS}/${SERVICE__NETWORKING__SERVICE__IPV4__NETMASK}"
-            gateway: "${SERVICE__NETWORKING__SERVICE__IPV4__GATEWAY}"
+        - subnet: $c{service/networking/service/ipv4/address}/$c{service/networking/service/ipv4/netmask}
+          gateway: $c{service/networking/service/ipv4/gateway}

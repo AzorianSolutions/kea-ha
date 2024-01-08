@@ -1,24 +1,63 @@
 import os
+import re
 import typing
 import yaml
 from pathlib import Path
 
 
-class ConfigUtil:
-    """A class for working with configuration related data and files."""
+class ConfigBuilder:
+    """A class for building configuration files."""
 
     @staticmethod
-    def flatten(config: dict[str, typing.Any], prefix: str = '') -> dict[str, typing.Any]:
-        result: dict[str, typing.Any] = {}
+    def save_yaml(path: str | Path, config: dict) -> None:
+        """Saves the given configuration dictionary to the given YAML file path."""
 
-        for key, value in config.items():
-            key = key.upper()
-            if isinstance(value, dict):
-                result.update(ConfigUtil.flatten(value, f'{prefix}{key}__'))
-            else:
-                result[f'{prefix}{key}'] = value
+        with open(str(path), 'w') as f:
+            yaml.dump(config, f)
+            f.close()
 
-        return result
+    @staticmethod
+    def build_env_file(config: dict) -> str:
+        """Builds a .env style file from the given configuration dictionary."""
+        env_file: str = ''
+        config = ConfigParser.parse(config, config)
+        env_config = ConfigUtil.flatten(config)
+
+        for key, value in env_config.items():
+            if isinstance(value, bool):
+                value = str(value).lower()
+            elif isinstance(value, list):
+                value = ','.join(value)
+            elif isinstance(value, dict):
+                value = ','.join([f'{k}:{v}' for k, v in value.items()])
+            elif isinstance(value, str):
+                value = value.strip()
+                if ' ' in value:
+                    value = f'"{value}"'
+
+            env_file += f'{key}={value}\n'
+
+        return env_file
+
+    @staticmethod
+    def build_tpl(template: str | Path, config: dict, parse: bool = True) -> str:
+        """Builds a configuration file from the given template and configuration dictionary."""
+        from jinja2 import Environment, FileSystemLoader
+
+        if not isinstance(template, Path):
+            template = Path(template)
+
+        if not template.exists():
+            raise FileNotFoundError(f'Failed to find the template file: {template}')
+
+        env = Environment(loader=FileSystemLoader(str(template.parent)), autoescape=True)
+        tpl = env.get_template(template.name)
+        tpl_content = tpl.render(config)
+
+        if parse:
+            tpl_content = ConfigParser.parse_string(config, tpl_content)
+
+        return tpl_content
 
 
 class ConfigLoader:
@@ -76,35 +115,115 @@ class ConfigLoader:
         return config
 
 
-class ConfigBuilder:
-    """A class for building configuration files."""
+class ConfigParser:
+    """A class for parsing variable references from values."""
+
+    ref_pattern = re.compile(r'\$(c|e){([a-z_]+[a-z0-9_/]*)}', re.IGNORECASE)
+    """ The regular expression pattern used to match variable references in values. """
 
     @staticmethod
-    def save_yaml(path: str | Path, config: dict) -> None:
-        """Saves the given configuration dictionary to the given YAML file path."""
+    def reference(config: dict, key: str, default: any = None, parse: bool = True) -> any:
+        """ Returns the configuration value for the given key, or the given default if not found. """
+        from functools import reduce
 
-        with open(str(path), 'w') as f:
-            yaml.dump(config, f)
-            f.close()
+        segment_boundary = '/' if '/' in key else '__'
+        segments = key.split(segment_boundary)
+
+        try:
+            result = reduce(lambda c, k: c[k] if not k.isnumeric() else c[int(k)], segments, config)
+        except (KeyError, TypeError):
+            result = default
+        if parse:
+            result = ConfigParser.parse(config, result)
+        return result
 
     @staticmethod
-    def build_env_file(config: dict) -> str:
-        """Builds a .env style file from the given configuration dictionary."""
-        env_file: str = ''
-        env_config = ConfigUtil.flatten(config)
+    def update(config: dict, key: str, value: any) -> dict:
+        """ Updates the configuration value for the given key. """
 
-        for key, value in env_config.items():
-            if isinstance(value, bool):
-                value = str(value).lower()
-            elif isinstance(value, list):
-                value = ','.join(value)
-            elif isinstance(value, dict):
-                value = ','.join([f'{k}:{v}' for k, v in value.items()])
-            elif isinstance(value, str):
-                value = value.strip()
-                if ' ' in value:
-                    value = f'"{value}"'
+        ref = config
 
-            env_file += f'{key}={value}\n'
+        for k in key.split('__')[:-1]:
+            ref = ref[k if not k.isnumeric() else int(k)]
 
-        return env_file
+        ref[key.split('__')[-1]] = value
+
+        return config
+
+    @staticmethod
+    def parse(config: dict, value: any, default: any = None) -> any:
+        """ Parses the given value for configuration references, updating the values with current configuration
+        values, and returning the updated copy. """
+
+        result = value.copy() if isinstance(value, dict | list) else value
+
+        if isinstance(result, str):
+            result = ConfigParser.parse_string(config, result, default)
+
+        elif isinstance(result, list):
+            result = ConfigParser.parse_list(config, result, default)
+
+        elif isinstance(result, dict):
+            result = ConfigParser.parse_dict(config, result, default)
+
+        return result
+
+    @staticmethod
+    def parse_string(config: dict, value: str, default: any = None) -> str:
+        """ Parses the given string for configuration references, updating the values with current configuration
+        values, and returning the updated copy. """
+
+        # Process $(c|e){...} references
+        matches = ConfigParser.ref_pattern.findall(value)
+
+        for match in matches:
+            ref = str(match[0]).lower()
+            if ref == 'c':
+                config_value = ConfigParser.reference(config, match[1], default, True)
+                value = value.replace(f'${match[0]}{{{match[1]}}}', str(config_value))
+            elif ref == 'e':
+                env_value = os.getenv(match[1])
+                value = value.replace(f'${match[0]}{{{match[1]}}}', str(env_value))
+
+        return value
+
+    @staticmethod
+    def parse_list(config: dict, value: list, default: any = None) -> list:
+        """ Parses the given list for configuration references, updating the values with current configuration
+        values, and returning the updated copy. """
+
+        result = []
+
+        for item in value:
+            result.append(ConfigParser.parse(config, item, default))
+
+        return result
+
+    @staticmethod
+    def parse_dict(config: dict, value: dict, default: any = None) -> dict:
+        """ Parses the given dictionary for configuration references, updating the values with current configuration
+        values, and returning the updated copy. """
+
+        result = {}
+
+        for k, v in value.items():
+            result[k] = ConfigParser.parse(config, v, default)
+
+        return result
+
+
+class ConfigUtil:
+    """A class for working with configuration related data and files."""
+
+    @staticmethod
+    def flatten(config: dict[str, typing.Any], prefix: str = '') -> dict[str, typing.Any]:
+        result: dict[str, typing.Any] = {}
+
+        for key, value in config.items():
+            key = key.upper()
+            if isinstance(value, dict):
+                result.update(ConfigUtil.flatten(value, f'{prefix}{key}__'))
+            else:
+                result[f'{prefix}{key}'] = value
+
+        return result

@@ -20,7 +20,7 @@ image:
     org.opencontainers.image.description: "Built from ISC Kea DHCP source with database back-end support"
     org.opencontainers.image.url: "https://github.com/AzorianSolutions/kea-ha"
     org.opencontainers.image.source: "https://github.com/AzorianSolutions/kea-ha"
-    org.opencontainers.image.version: "${KEA__VERSION}"
+    org.opencontainers.image.version: "$c{kea/version}"
     org.opencontainers.image.authors: "Azorian Solutions <help@azorian.solutions>"
     org.opencontainers.image.licenses: "MIT"
     org.opencontainers.image.created: "2024-01-06T20:42:00.000Z"
@@ -34,30 +34,43 @@ image:
     context: .
     dockerfile: deploy/docker/Dockerfile
     args:
-      - KHA_SHARE_PATH=${APP__VERSION}
-      - KEA_VERSION=${KEA__VERSION}
+      - KHA_SHARE_PATH=$c{image/paths/share}
+      - KEA_VERSION=$c{kea/version}
 service:
   name: kea-ha
   user: kea
   group: kea
   environment:
       prefix: KHA
-      file: build/.env
   paths:
     kha:
-      root: /opt/kea-ha
+      root: /opt/kha
+    compose:
+      file: $c{service/paths/kha/root}/docker-compose.yml
+      env: $c{service/paths/kha/root}/.env
+    conf:
+      kea_ctrl_agent: $c{service/paths/kea/config}/kea-ctrl-agent.conf
+      kea_dhcp4: $c{service/paths/kea/config}/kea-dhcp4.conf
+      kea_dhcp6: $c{service/paths/kea/config}/kea-dhcp6.conf
+      kea_dhcp_ddns: $c{service/paths/kea/config}/kea-dhcp-ddns.conf
+      supervisor_kea_ctrl_agent: $c{service/paths/supervisor/config}/conf.d/kea-ctrl-agent.conf
+      supervisor_kea_dhcp4: $c{service/paths/supervisor/config}/conf.d/kea-dhcp4.conf
+      supervisor_kea_dhcp6: $c{service/paths/supervisor/config}/conf.d/kea-dhcp6.conf
+      supervisor_kea_dhcp_ddns: $c{service/paths/supervisor/config}/conf.d/kea-dhcp-ddns.conf
+      supervisord: $c{service/paths/supervisor/config}/supervisord.conf
     db:
-      data: /opt/kea-ha/var/lib/mysql
-      log: /opt/kea-ha/var/log/mysql
+      data: $c{service/paths/kha/root}/var/lib/mysql
+      log: $c{service/paths/kha/root}/var/log/mysql
     kea:
-      config: /opt/kea-ha/etc
-      data: /opt/kea-ha/var/kea
-      lib: /opt/kea-ha/var/lib/kea
-      log: /opt/kea-ha/var/log/kea
-      run: /opt/kea-ha/var/run/kea
-      tmp: /opt/kea-ha/var/tmp/kea
+      config: $c{service/paths/kha/root}/etc/kea
+      data: $c{service/paths/kha/root}/var/kea
+      lib: $c{service/paths/kha/root}/var/lib/kea
+      log: $c{service/paths/kha/root}/var/log/kea
+      run: $c{service/paths/kha/root}/var/run/kea
+      tmp: $c{service/paths/kha/root}/var/tmp/kea
     supervisor:
-      log: /opt/kea-ha/var/log/supervisor
+      config: $c{service/paths/kha/root}/etc/supervisor
+      log: $c{service/paths/kha/root}/var/log/supervisor
   ports:
     tcp:
       http: 8000

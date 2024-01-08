@@ -36,7 +36,7 @@ def command(env: Environment, yes: bool):
             logger.info(process.stdout)
         return
 
-    prepare_packages = env.settings.c('host__packages__prepare')
+    prepare_packages = env.settings.c('host/packages/prepare')
 
     # Install the prepare-stage packages
     process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *prepare_packages.split(' ')])
@@ -81,7 +81,7 @@ def command(env: Environment, yes: bool):
     if process.returncode != 0:
         logger.warning(f'APT update yielded errors: {process.stderr}')
 
-    payload_packages = env.settings.c('host__packages__payload')
+    payload_packages = env.settings.c('host/packages/payload')
 
     # Install the payload packages
     process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *payload_packages.split(' ')])
