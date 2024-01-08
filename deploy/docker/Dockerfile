@@ -70,14 +70,6 @@ ARG KEA_VERSION=2.5.4
 ENV DEBIAN_FRONTEND=noninteractive
 ENV KHA_SHARE_PATH=${KHA_SHARE_PATH}
 ENV KEA_VERSION=${KEA_VERSION}
-LABEL org.opencontainers.image.title="ISC Kea HA (${KEA_VERSION})"
-LABEL org.opencontainers.image.description="Built from Kea source ${KEA_VERSION} with database back-end support",
-LABEL org.opencontainers.image.url="https://github.com/AzorianSolutions/kea-ha",
-LABEL org.opencontainers.image.source="https://github.com/AzorianSolutions/kea-ha",
-LABEL org.opencontainers.image.version="${KEA_VERSION}",
-LABEL org.opencontainers.image.authors="Azorian Solutions <help@azorian.solutions>"
-LABEL org.opencontainers.image.created="2024-01-06T20:42:00.000Z",
-LABEL org.opencontainers.image.licenses="MIT"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

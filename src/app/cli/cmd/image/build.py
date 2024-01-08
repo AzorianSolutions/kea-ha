@@ -2,11 +2,9 @@ import click
 import os
 from docker.errors import APIError, BuildError
 from loguru import logger
-from pathlib import Path
 from app.cli.entry import pass_environment
 from app.model.cli import Environment
 from app.model.images import ImageRepo
-from app.util.config import ConfigBuilder
 from . import group
 
 HLP_OPT_YES = 'Automatically answer yes to all prompts.'
@@ -25,15 +23,13 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     """Builds the container image for the given tag."""
     import docker
 
-    config = env.settings.get_config
-
     if tag:
         repo = ImageRepo.from_tag(tag)
     else:
-        meta = config('image.repository')
+        meta = env.settings.c('image__repository')
         repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
 
-    version: str = config('kea.version')
+    version: str = env.settings.c('kea__version')
 
     if not yes:
         confirm = click.confirm('Are you sure you want to build the container image?', default=None)
@@ -44,43 +40,41 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
         click.echo('What version of the Kea software would you like to build?\n')
 
-        version_input = click.prompt('Kea Version', default=env.settings.get_config('kea.version'))
+        version_input = click.prompt('Kea Version', default=env.settings.c('kea__version'))
 
         if version_input:
             version = version_input
 
     logger.info(f'Building the container image...')
 
-    env_file = Path(env.settings.get_config('app.environment.file'))
-
-    # Save the environment file if the path is writable
-    if not os.access(env_file, os.W_OK):
-        logger.error(f'Failed to write the environment file: {env_file}')
-        return
-
-    # Build the environment file
-    file_contents = ConfigBuilder.build_env_file(env.settings.config)
-
-    with open(env_file, 'w') as f:
-        f.write(file_contents)
-        f.close()
-
     os.environ['DOCKER_BUILDKIT'] = '1'
 
     client = docker.from_env()
 
-    build_args: dict = {
-        'KHA_SHARE_PATH': config('image.paths.share'),
-        'KEA_VERSION': version,
-    }
+    # Additional build arguments passed to the container image
+    build_args: dict = {}
 
+    # Attempt to load additional build arguments from the configuration
+    if isinstance(config_build_args := env.settings.c('image__build__args'), dict):
+        build_args.update(config_build_args)
+
+    # Additional labels added to the container image
     labels: dict = {}
 
+    # Attempt to load additional image labels from the configuration
+    if isinstance(config_labels := env.settings.c('image__labels'), dict):
+        labels.update(config_labels)
+
+    # Additional host entries added to the container's `/etc/hosts` file
     hosts: dict = {}
+
+    # Attempt to load additional host entries from the configuration
+    if isinstance(config_hosts := env.settings.c('image__hosts'), dict):
+        hosts.update(config_hosts)
 
     command_args: dict = {
         'path': str(env.settings.root_path),
-        'dockerfile': 'deploy/docker/Dockerfile',
+        'dockerfile': env.settings.c('image__build__dockerfile'),
         'tag': repo.repo_path,
         'nocache': no_cache,
         'target': stage,

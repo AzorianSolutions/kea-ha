@@ -14,7 +14,7 @@ class ConfigUtil:
         for key, value in config.items():
             key = key.upper()
             if isinstance(value, dict):
-                result.update(ConfigUtil.flatten(value, f'{prefix}{key}_'))
+                result.update(ConfigUtil.flatten(value, f'{prefix}{key}__'))
             else:
                 result[f'{prefix}{key}'] = value
 
@@ -78,6 +78,14 @@ class ConfigLoader:
 
 class ConfigBuilder:
     """A class for building configuration files."""
+
+    @staticmethod
+    def save_yaml(path: str | Path, config: dict) -> None:
+        """Saves the given configuration dictionary to the given YAML file path."""
+
+        with open(str(path), 'w') as f:
+            yaml.dump(config, f)
+            f.close()
 
     @staticmethod
     def build_env_file(config: dict) -> str:

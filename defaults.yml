@@ -2,7 +2,7 @@ app:
   name: kea-ha
   version: 0.1.0
   cli:
-    entrypoint: kea
+    entrypoint: kha
   environment:
     prefix: KHA
     file: .env
@@ -15,24 +15,57 @@ image:
     url: docker.io
     name: azoriansolutions/kea-ha
     tag: latest
+  labels:
+    org.opencontainers.image.title: "Kea HA"
+    org.opencontainers.image.description: "Built from ISC Kea DHCP source with database back-end support"
+    org.opencontainers.image.url: "https://github.com/AzorianSolutions/kea-ha"
+    org.opencontainers.image.source: "https://github.com/AzorianSolutions/kea-ha"
+    org.opencontainers.image.version: "${KEA__VERSION}"
+    org.opencontainers.image.authors: "Azorian Solutions <help@azorian.solutions>"
+    org.opencontainers.image.licenses: "MIT"
+    org.opencontainers.image.created: "2024-01-06T20:42:00.000Z"
+  hosts:
+    cfdns: 1.1.1.1
   paths:
     share: /usr/share/kea-ha
   service:
     interface: eth2
-kea:
-  version: 2.5.4
-  admin:
-    username: kea
-    password: kea
-  backend:
-    type: mysql
-    opts:
-      host: db
-      port: 3306
-      name: kea
-      username: kea
-      password: kea
-      root_password: kea
+  build:
+    context: .
+    dockerfile: deploy/docker/Dockerfile
+    args:
+      - KHA_SHARE_PATH=${APP__VERSION}
+      - KEA_VERSION=${KEA__VERSION}
+service:
+  name: kea-ha
+  user: kea
+  group: kea
+  environment:
+      prefix: KHA
+      file: build/.env
+  paths:
+    kha:
+      root: /opt/kea-ha
+    db:
+      data: /opt/kea-ha/var/lib/mysql
+      log: /opt/kea-ha/var/log/mysql
+    kea:
+      config: /opt/kea-ha/etc
+      data: /opt/kea-ha/var/kea
+      lib: /opt/kea-ha/var/lib/kea
+      log: /opt/kea-ha/var/log/kea
+      run: /opt/kea-ha/var/run/kea
+      tmp: /opt/kea-ha/var/tmp/kea
+    supervisor:
+      log: /opt/kea-ha/var/log/supervisor
+  ports:
+    tcp:
+      http: 8000
+      supervisor: 8001
+    udp:
+      # If you want to make the Kea DHCP4 server available for to relays on the host network,
+      # uncomment the following line:
+      # dhcp: 67
   networking:
     mgmt:
       interface: eth1
@@ -46,11 +79,27 @@ kea:
         address: 192.168.251.1
         netmask: 29
         gateway: 192.168.251.6
+kea:
+  version: 2.5.4
+  admin:
+    username: kea
+    password: kea
+  backend:
+    type: mysql
+    opts:
+      version: 8.2
+      host: db
+      port: 3306
+      root_password: kea
+      name: kea
+      username: kea
+      password: kea
   logging:
     severity: INFO
     debuglevel: 0
   ha:
     enabled: false
     mode: primary
+    name: node1
     peer:
       address: 192.168.2.11
