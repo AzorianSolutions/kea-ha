@@ -19,14 +19,14 @@ initialize_app () {
   mkdir -p /var/lib/kea
   mkdir -p /var/log/kea
   mkdir -p /var/run/kea
-  chown -R root:root /etc/kea
-  chown -R root:root /var/lib/kea
-  chown -R root:root /var/log/kea
-  chown -R root:root /var/run/kea
+  # chown -R kea:kea /etc/kea
+  # chown -R kea:kea /var/lib/kea
+  # chown -R kea:kea /var/log/kea
+  # chown -R kea:kea /var/run/kea
   
   # Set up Supervisor
   mkdir -p /var/log/supervisor/
-  chown -R root:root /var/log/supervisor/
+  # chown -R root:root /var/log/supervisor/
 }
 
 initialize_db () {
@@ -45,74 +45,10 @@ upgrade_db () {
   kea-admin db-upgrade "${DB_BACKEND}" -h "${KEA_DB_HOST}" -P "${KEA_DB_PORT}" -u "${DB_USER}" -p "${DB_PASSWORD}" -n "${KEA_DB_NAME}"
 }
 
-build_config () {
-  tpl_file=$(echo "$1" | xargs)
-  target_path="$(echo "${2:-/etc/kea}" | xargs)"
-  target_file=$(echo "$3" | xargs)
-  full_tpl_path="$KHA_SHARE_PATH/tpl/$tpl_file"
-  full_target_path="$target_path/$target_file"
-
-  # Validate that the template file was given a name
-  if [ "$tpl_file" == "" ]; then
-    echo "No template file name provided to build_config"
-    exit 1
-  fi
-
-  # Validate that the template file exists and is readable
-  if [ ! -r "$full_tpl_path" ]; then
-    echo "Template file $full_tpl_path does not exist or is not readable"
-    exit 1
-  fi
-
-  # Validate that a target file name was provided
-  if [ "$target_file" == "" ]; then
-    echo "No target file name provided to build_config"
-    exit 1
-  fi
-
-  # Validate that the target file is writable if it exists
-  if [ -f "$full_target_path" ] && [ ! -w "$full_target_path" ]; then
-    echo "Target file $full_target_path exists but is not writable"
-    exit 1
-  fi
-
-  # Create the target path if it doesn't exist
-  mkdir -p "$target_path"
-
-  # Remove the existing file if it exists
-  if [ -f "$full_target_path" ]; then
-    rm -fr "$full_target_path"
-  fi
-
-  # Build the configuration file from the template if it exists
-  if [ -f "$full_tpl_path" ]; then
-    envsubst < "$full_tpl_path" > "$full_target_path"
-  fi
-}
-
-# Build the service configuration files from the templates
-build_configs () {
-  if [[ "$KEA_HA_ENABLED" == "yes" ]]; then
-    build_config "kea-dhcp4-ha.conf" "/etc/kea" "kea-dhcp4.conf"
-  else
-    build_config "kea-dhcp4.conf" "/etc/kea" "kea-dhcp4.conf"
-  fi
-
-  build_config "kea-ctrl-agent.conf" "/etc/kea" "kea-ctrl-agent.conf"
-  build_config "supervisor-kea-agent.conf" "/etc/supervisor/conf.d" "kea-agent.conf"
-  build_config "supervisor-kea-dhcp4.conf" "/etc/supervisor/conf.d" "kea-dhcp4.conf"
-  build_config "supervisord.conf" "/etc/supervisor" "supervisord.conf"
-}
-
 echo "Initializing application environment..."
 
 # Initialize the application environment
 initialize_app
-
-echo "Building service configuration files..."
-
-# Build the service configuration files from the templates
-build_configs
 
 # If using the MySQL engine, then check if the kea database exists. If not, create it.
 if [ "$KEA_DB_TYPE" == "mysql" ]; then

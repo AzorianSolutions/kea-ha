@@ -42,8 +42,12 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
         version_input = click.prompt('Kea Version', default=env.settings.c('kea/version'))
 
-        if version_input:
+        if version_input and version_input != version:
             version = version_input
+
+            # Save the version change back to the configuration
+            env.settings.u('kea/version', version)
+            env.settings.save()
 
     logger.info(f'Building the container image...')
 
@@ -77,7 +81,6 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
         'dockerfile': env.settings.c('image/build/dockerfile'),
         'tag': repo.repo_path,
         'nocache': no_cache,
-        'target': stage,
         'buildargs': build_args,
         'labels': labels,
         'extra_hosts': hosts,
@@ -88,6 +91,9 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
         'forcerm': False,
         'quiet': False,
     }
+
+    if stage:
+        command_args['target'] = stage
 
     build_success: bool = False
     build_response: str = ''

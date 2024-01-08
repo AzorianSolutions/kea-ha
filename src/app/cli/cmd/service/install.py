@@ -39,10 +39,8 @@ def command(env: Environment, yes: bool):
 
     if not result or result.returncode != 0:
         logger.error(f'Container services installation failed.')
-
         if result:
             logger.error(result.stderr.decode("utf-8"))
-
         return
 
     logger.success(f'Installed the container services.')

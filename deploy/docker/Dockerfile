@@ -92,11 +92,8 @@ COPY --from=builder /share/kea /share/kea
 # Copy the default environment settings into the container
 COPY defaults.env ${KHA_SHARE_PATH}/defaults.env
 
-# Copy the configuration templates into the container
-COPY deploy/tpl/* ${KHA_SHARE_PATH}/tpl/
-
 # Create the entrypoint script in the container
-COPY deploy/inc/entrypoint.sh /entrypoint.sh
+COPY deploy/docker/entrypoint.sh /entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +rwx /entrypoint.sh

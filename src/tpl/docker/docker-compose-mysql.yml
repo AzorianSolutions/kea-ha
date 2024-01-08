@@ -33,7 +33,7 @@ services:
       db0:
       mgmt0:
         ipv4_address: $c{service/networking/mgmt/ipv4/address}
-      subdhcp0:
+      service0:
         ipv4_address: $c{service/networking/service/ipv4/address}
     ports:
       - $c{service/ports/tcp/http}:$c{service/ports/tcp/http}
@@ -54,8 +54,8 @@ networks:
       config:
         - subnet: $c{service/networking/mgmt/ipv4/address}/$c{service/networking/mgmt/ipv4/netmask}
           gateway: $c{service/networking/mgmt/ipv4/gateway}
-  subdhcp0:
-    name: subdhcp0
+  service0:
+    name: service0
     driver: ipvlan
     driver_opts:
       ipvlan_mode: l2

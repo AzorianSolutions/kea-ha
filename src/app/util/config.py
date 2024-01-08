@@ -142,11 +142,13 @@ class ConfigParser:
         """ Updates the configuration value for the given key. """
 
         ref = config
+        segment_boundary = '/' if '/' in key else '__'
+        segments = key.split(segment_boundary)
 
-        for k in key.split('__')[:-1]:
+        for k in segments[:-1]:
             ref = ref[k if not k.isnumeric() else int(k)]
 
-        ref[key.split('__')[-1]] = value
+        ref[segments[-1]] = value
 
         return config
 
