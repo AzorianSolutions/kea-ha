@@ -119,6 +119,6 @@ kea:
   ha:
     enabled: false
     mode: primary
-    name: node1
     peer:
-      address: 192.168.2.11
+      ipv4:
+        address: 192.168.2.11

@@ -1,40 +1,40 @@
 services:
   db:
-    image: mysql:$c{kea/backend/opts/version}
+    image: mysql:{{ kea.backend.opts.version }}
     restart: unless-stopped
     command: --default-authentication-plugin=caching_sha2_password
     volumes:
-      - $c{service/paths/db/data}:/var/lib/mysql
+      - {{ service.paths.db.data }}:/var/lib/mysql
     networks:
       - db0
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_ROOT_PASSWORD=$c{kea/backend/opts/root_password}
-      - MYSQL_DATABASE=$c{kea/backend/opts/name}
-      - MYSQL_USER=$c{kea/backend/opts/username}
-      - MYSQL_PASSWORD=$c{kea/backend/opts/password}
+      - MYSQL_ROOT_PASSWORD={{ kea.backend.opts.root_password }}
+      - MYSQL_DATABASE={{ kea.backend.opts.name }}
+      - MYSQL_USER={{ kea.backend.opts.username }}
+      - MYSQL_PASSWORD={{ kea.backend.opts.password }}
   kea:
-    image: $c{image/repository/url}/$c{image/repository/name}:$c{image/repository/tag}
+    image: {{ image.repository.url }}/{{ image.repository.name }}:{{ image.repository.tag }}
     restart: unless-stopped
     depends_on: [ db ]
     cap_add:
       - NET_ADMIN
       - NET_RAW
     privileged: true
-    user: $c{image/uid}:$c{image/gid}
+    user: {{ image.uid }}:{{ image.gid }}
     volumes:
-      - $c{service/paths/kea/config}:/etc/kea
-      - $c{service/paths/kea/log}:/var/log/kea
-      - $c{service/paths/supervisor/config}:/etc/supervisor
-      - $c{service/paths/supervisor/log}:/var/log/supervisor
+      - {{ service.paths.kea.config }}:/etc/kea
+      - {{ service.paths.kea.log }}:/var/log/kea
+      - {{ service.paths.supervisor.config }}:/etc/supervisor
+      - {{ service.paths.supervisor.log }}:/var/log/supervisor
     networks:
       db0:
       mgmt0:
-        ipv4_address: $c{service/networking/mgmt/ipv4/address}
+        ipv4_address: {{ service.networking.mgmt.ipv4.address }}
       service0:
-        ipv4_address: $c{service/networking/service/ipv4/address}
+        ipv4_address: {{ service.networking.service.ipv4.address }}
     ports:
-      - $c{service/ports/tcp/http}:$c{service/ports/tcp/http}
+      - {{ service.ports.tcp.http }}:{{ service.ports.tcp.http }}
     env_file:
       - .env
 networks:
@@ -46,20 +46,20 @@ networks:
     driver: ipvlan
     driver_opts:
       ipvlan_mode: l2
-      parent: $c{service/networking/mgmt/interface}
+      parent: {{ service.networking.mgmt.interface }}
     ipam:
       driver: default
       config:
-        - subnet: $c{service/networking/mgmt/ipv4/address}/$c{service/networking/mgmt/ipv4/netmask}
-          gateway: $c{service/networking/mgmt/ipv4/gateway}
+        - subnet: {{ service.networking.mgmt.ipv4.address }}/{{ service.networking.mgmt.ipv4.netmask }}
+          gateway: {{ service.networking.mgmt.ipv4.gateway }}
   service0:
     name: service0
     driver: ipvlan
     driver_opts:
       ipvlan_mode: l2
-      parent: $c{service/networking/service/interface}
+      parent: {{ service.networking.service.interface }}
     ipam:
       driver: default
       config:
-        - subnet: $c{service/networking/service/ipv4/address}/$c{service/networking/service/ipv4/netmask}
-          gateway: $c{service/networking/service/ipv4/gateway}
+        - subnet: {{ service.networking.service.ipv4.address }}/{{ service.networking.service.ipv4.netmask }}
+          gateway: {{ service.networking.service.ipv4.gateway }}
