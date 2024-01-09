@@ -1,15 +1,15 @@
-import click
-import sys
+from app.model.config import Config
 from app.model.settings import AppSettings
 
 
 class Environment:
-    _settings: AppSettings = None
+    """ The application environment class that provides access to the environment settings and configuration. """
 
-    @property
-    def debug(self) -> bool:
-        """ Returns whether debug mode is enabled. """
-        return self._settings.debug if isinstance(self._settings, AppSettings) else False
+    _settings: AppSettings = None
+    """ The environment settings. """
+
+    _config: Config = None
+    """ The environment configuration. """
 
     @property
     def settings(self) -> AppSettings:
@@ -20,15 +20,15 @@ class Environment:
     def settings(self, value: AppSettings):
         """ Sets the app's settings. """
         self._settings = value
+        if self.config is None:
+            self._config = Config(value.config)
 
-    @staticmethod
-    def log(msg, *args):
-        """Logs a message to stderr."""
-        if args:
-            msg %= args
-        click.echo(msg, file=sys.stderr)
+    @property
+    def config(self) -> Config:
+        """ Returns the environment configuration. """
+        return self._config
 
-    def vlog(self, msg, *args):
-        """Logs a message to stderr only if verbose is enabled."""
-        if self.debug:
-            self.log(msg, *args)
+    @property
+    def debug(self) -> bool:
+        """ Returns whether debug mode is enabled. """
+        return self._settings.debug if isinstance(self._settings, AppSettings) else False
