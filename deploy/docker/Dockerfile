@@ -58,7 +58,7 @@ RUN apt-get purge -y --auto-remove \
     rm -rf /usr/src/kea
 
 
-FROM base AS runner
+FROM base AS service
 ARG KHA_UID=0
 ARG KHA_USER=root
 ARG KHA_GID=0
@@ -111,7 +111,7 @@ RUN mkdir -p /etc/kea && \
     chown -R ${KHA_UID}:${KHA_GID} /var/log/supervisor
 
 
-FROM runner AS runner-dev
+FROM service AS service-diag
 ARG KHA_UID=0
 ARG KHA_GID=0
 ENV DEBIAN_FRONTEND=noninteractive
