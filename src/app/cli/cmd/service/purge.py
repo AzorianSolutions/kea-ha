@@ -9,7 +9,7 @@ from . import group
 @confirm_option
 @pass_environment
 def command(env: Environment, yes: bool):
-    """Purges the entire service deployment including the images. """
+    """Purges the entire service deployment. """
 
     if not yes:
         confirm = click.confirm('Are you sure you want to purge the service deployment?', default=None)
@@ -19,3 +19,4 @@ def command(env: Environment, yes: bool):
             return
 
     logger.info(f'Purging the service deployment...')
+    logger.warning('Feature not implemented!')
