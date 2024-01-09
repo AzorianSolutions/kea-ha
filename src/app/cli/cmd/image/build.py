@@ -26,6 +26,12 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
     if tag:
         repo = ImageRepo.from_tag(tag)
+        if repo.repo_url == "":
+            repo.repo_url = env.settings.c('image/repository/url')
+        if repo.repo_name == "":
+            repo.repo_name = env.settings.c('image/repository/name')
+        if repo.repo_tag == "":
+            repo.repo_tag = env.settings.c('image/repository/tag')
     else:
         meta = env.settings.c('image/repository')
         repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
