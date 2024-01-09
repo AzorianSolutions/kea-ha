@@ -4,7 +4,7 @@ from loguru import logger
 from pathlib import Path
 from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
-from app.util.config import ConfigBuilder, ConfigParser
+from app.util.config import ConfigBuilder
 from . import group
 
 HLP_OPT_YES = 'Automatically answer yes to all prompts.'
@@ -61,7 +61,7 @@ def command(env: Environment, yes: bool):
 
     logger.info(f'Saved the service environment file: {env_file}')
 
-    compose_tpl_path = f'src/tpl/docker/docker-compose-{env.settings.c("kea/backend/type")}.yml'
+    compose_tpl_path = env.settings.c(f'templates/docker/docker_compose_{env.settings.c("kea/backend/type")}')
 
     # Render the configuration file template
     try:
@@ -90,15 +90,17 @@ def command(env: Environment, yes: bool):
         'kea-ctrl-agent',
         'kea-dhcp4',
         # 'kea-dhcp6',
+        # 'kea-dhcp-ddns',
         'supervisor-kea-ctrl-agent',
         'supervisor-kea-dhcp4',
         # 'supervisor-kea-dhcp6',
+        # 'supervisor-kea-dhcp-ddns',
         'supervisord',
     ]
 
     for tpl_name in templates:
-        conf_tpl_path = f'src/tpl/conf/{tpl_name}.conf'
         conf_tpl_ref = tpl_name.replace('-', '_')
+        conf_tpl_path = env.settings.c(f'templates/conf/{conf_tpl_ref}')
 
         # Render the configuration file template
         try:

@@ -6,6 +6,7 @@ from pathlib import Path
 from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
 from app.model.images import ImageRepo
+from app.util.config import ConfigBuilder
 from . import group
 
 HLP_OPT_YES = 'Automatically answer yes to all prompts.'
@@ -55,6 +56,66 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
             # Save the version change back to the configuration
             env.settings.u('kea/version', version)
             env.settings.save()
+
+    dockerfile_tpl_path = env.settings.c(f'templates/docker/dockerfile')
+
+    # Render the Dockerfile template
+    try:
+        template = ConfigBuilder.build_tpl(dockerfile_tpl_path, env.settings.config)
+    except FileNotFoundError as e:
+        logger.error(f'Failed to find the Dockerfile template: {dockerfile_tpl_path}')
+        return
+
+    dockerfile = Path(env.settings.c('image/build/dockerfile'))
+
+    if not dockerfile.parent.exists():
+        if not os.access(dockerfile.parent, os.W_OK):
+            logger.error(f'No write permission to Dockerfile path: {dockerfile.parent}')
+            return
+
+        logger.debug(f'Creating the Dockerfile path: {dockerfile.parent}')
+        dockerfile.parent.mkdir(parents=True)
+
+    with open(dockerfile, 'w') as f:
+        f.write(template)
+        f.close()
+
+    logger.info(f'Saved the image Dockerfile: {dockerfile}')
+
+    source_docker_ignore = env.settings.root_path / '.dockerignore'
+
+    if not source_docker_ignore.exists():
+        logger.error(f'No docker ignore file found at: {source_docker_ignore}')
+        return
+
+    kha_root = Path(env.settings.c('service/paths/kha/root'))
+
+    target_docker_ignore = kha_root / '.dockerignore'
+
+    if not target_docker_ignore.parent.exists():
+        if not os.access(target_docker_ignore.parent, os.W_OK):
+            logger.error(f'No write permission to docker ignore path: {target_docker_ignore.parent}')
+            return
+
+        logger.debug(f'Creating the docker ignore path: {target_docker_ignore.parent}')
+        target_docker_ignore.parent.mkdir(parents=True)
+
+    with open(source_docker_ignore, 'r') as f:
+        ignore_contents = f.read()
+        f.close()
+
+    with open(target_docker_ignore, 'w') as f:
+        f.write(ignore_contents)
+        f.close()
+
+    logger.info(f'Created Docker ignore file: {target_docker_ignore}')
+
+    # Temporary until entrypoint bash script goes away
+    entrypoint_tpl_path = env.settings.root_path / 'deploy' / 'docker' / 'entrypoint.sh'
+
+    with open(kha_root / 'entrypoint.sh', 'w') as f:
+        f.write(entrypoint_tpl_path.read_text())
+        f.close()
 
     logger.info(f'Building the container image...')
 

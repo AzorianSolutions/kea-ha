@@ -1,0 +1,12 @@
+*.egg-info
+*.pyc
+.idea
+.env
+.github
+config.yml
+docker-compose.yml
+build
+etc
+usr
+var
+venv

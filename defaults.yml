@@ -10,6 +10,21 @@ host:
   packages:
     prepare: ca-certificates curl gnupg lsb-release
     payload: docker-ce docker-ce-cli containerd.io net-tools
+templates:
+  conf:
+    kea_ctrl_agent: src/templates/conf/kea-ctrl-agent.conf.j2
+    kea_dhcp4: src/templates/conf/kea-dhcp4.conf.j2
+    kea_dhcp6: src/templates/conf/kea-dhcp6.conf.j2
+    kea_dhcp_ddns: src/templates/conf/kea-dhcp-ddns.conf.j2
+    supervisor_kea_ctrl_agent: src/templates/conf/supervisor-kea-ctrl-agent.conf.j2
+    supervisor_kea_dhcp4: src/templates/conf/supervisor-kea-dhcp4.conf.j2
+    supervisor_kea_dhcp6: src/templates/conf/supervisor-kea-dhcp6.conf.j2
+    supervisor_kea_dhcp_ddns: src/templates/conf/supervisor-kea-dhcp-ddns.conf.j2
+    supervisord: src/templates/conf/supervisord.conf.j2
+  docker:
+    dockerfile: src/templates/docker/Dockerfile.j2
+    docker_compose_mysql: src/templates/docker/docker-compose-mysql.yml.j2
+    docker_compose_pgsql: src/templates/docker/docker-compose-pgsql.yml.j2
 image:
   uid: 0
   user: root
@@ -36,7 +51,7 @@ image:
     interface: eth2
   build:
     context: .
-    dockerfile: deploy/docker/Dockerfile
+    dockerfile: $c{service/paths/kha/root}/Dockerfile
     args:
       - KHA_UID=$c{image/uid}
       - KHA_USER=$c{image/user}
