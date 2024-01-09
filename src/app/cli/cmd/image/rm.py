@@ -6,7 +6,7 @@ from app.model.images import ImageRepo
 from . import group
 
 
-@group.command('purge')
+@group.command('rm')
 @confirm_option
 @click.option('-t', '--tag', default=None, help='The tag to purge from the container image.')
 @pass_environment
