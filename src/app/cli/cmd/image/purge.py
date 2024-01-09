@@ -10,7 +10,12 @@ from . import group
 @confirm_option
 @click.option('-t', '--tag', default=None, help='The tag to purge from the container image.')
 @pass_environment
-def command(env: Environment, yes: bool, tag: str):
+def wrapper(env: Environment, yes: bool, tag: str):
+    """Purges the given container image or uses the default."""
+    command(env, yes, tag)
+
+
+def command(env: Environment, yes: bool, tag: str) -> bool:
     """Purges the given container image or uses the default."""
     import docker
     from docker.errors import APIError, ImageNotFound
@@ -32,7 +37,7 @@ def command(env: Environment, yes: bool, tag: str):
 
         if not confirm:
             logger.warning('Aborting container image purge process for lack of user confirmation or the `-y` flag.')
-            return
+            return False
 
     logger.info(f'Purging container image {repo.repo_path}...')
 
@@ -49,4 +54,4 @@ def command(env: Environment, yes: bool, tag: str):
     else:
         logger.success(f'Container image {repo.repo_path} purged.')
 
-    return
+    return True

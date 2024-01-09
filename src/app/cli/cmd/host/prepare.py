@@ -17,7 +17,12 @@ docker_config: dict = {
 @group.command('prepare')
 @confirm_option
 @pass_environment
-def command(env: Environment, yes: bool):
+def wrapper(env: Environment, yes: bool):
+    """Prepares the host environment to run the service containers."""
+    command(env, yes)
+
+
+def command(env: Environment, yes: bool) -> bool:
     """Prepares the host environment to run the service containers."""
     logger.info(f'Preparing the host environment for service containers; confirmed: {yes}; debug: {env.settings.debug}')
 
@@ -34,7 +39,7 @@ def command(env: Environment, yes: bool):
         logger.error(f'Failed to perform a upgrade on the host environment: {process.stderr}')
         if env.debug:
             logger.info(process.stdout)
-        return
+        return False
 
     prepare_packages = env.settings.c('host/packages/prepare')
 
@@ -45,7 +50,7 @@ def command(env: Environment, yes: bool):
         logger.error(f'Failed to install first-stage APT packages in the host environment: {process.stderr}')
         if env.debug:
             logger.info(process.stdout)
-        return
+        return False
 
     docker_keyring: Path = Path('/usr/share/keyrings/docker-archive-keyring.gpg')
 
@@ -59,7 +64,7 @@ def command(env: Environment, yes: bool):
             logger.error(f'Failed to install Docker keyring: {process.stderr}')
             if env.debug:
                 logger.info(process.stdout)
-            return
+            return False
 
     apt_sources: Path = Path('/etc/apt/sources.list.d/docker.list')
 
@@ -73,7 +78,7 @@ def command(env: Environment, yes: bool):
             logger.error(f'Failed to install Docker APT sources: {process.stderr}')
             if env.debug:
                 logger.info(process.stdout)
-            return
+            return False
 
     # Update the APT cache
     process = Run.c(['sudo', 'apt-get', 'update', '-y' if yes else ''])
@@ -90,7 +95,7 @@ def command(env: Environment, yes: bool):
         logger.error(f'Failed to install first-stage APT packages in the host environment: {process.stderr}')
         if env.debug:
             logger.info(process.stdout)
-        return
+        return False
 
     docker_config_path: Path = Path('/etc/docker/daemon.json')
 
@@ -127,3 +132,4 @@ def command(env: Environment, yes: bool):
             logger.info(process.stdout)
 
     logger.success(f'Host environment prepared for service containers.')
+    return True

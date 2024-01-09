@@ -21,7 +21,12 @@ HLP_ARG_TAG = 'The image path, optionally including the repository URL, image na
 @click.option('-s', '--stage', default=None, help=HLP_OPT_STAGE)
 @click.argument('tag', default=None, required=False, metavar='<tag>')
 @pass_environment
-def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
+def wrapper(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
+    """Builds the container image for the given tag."""
+    command(env, yes, no_cache, stage, tag)
+
+
+def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -> bool:
     """Builds the container image for the given tag."""
     import docker
 
@@ -44,7 +49,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
         if not confirm:
             logger.warning('Aborting container image build process for lack of user confirmation or the `-y` flag.')
-            return
+            return False
 
         click.echo('What version of the Kea software would you like to build?\n')
 
@@ -64,14 +69,14 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
         template = ConfigBuilder.build_tpl(dockerfile_tpl_path, env.settings.config)
     except FileNotFoundError as e:
         logger.error(f'Failed to find the Dockerfile template: {dockerfile_tpl_path}')
-        return
+        return False
 
     dockerfile = Path(env.settings.c('image/build/dockerfile'))
 
     if not dockerfile.parent.exists():
         if not os.access(dockerfile.parent, os.W_OK):
             logger.error(f'No write permission to Dockerfile path: {dockerfile.parent}')
-            return
+            return False
 
         logger.debug(f'Creating the Dockerfile path: {dockerfile.parent}')
         dockerfile.parent.mkdir(parents=True)
@@ -86,7 +91,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
 
     if not source_docker_ignore.exists():
         logger.error(f'No docker ignore file found at: {source_docker_ignore}')
-        return
+        return False
 
     kha_root = Path(env.settings.c('service/paths/kha/root'))
 
@@ -95,7 +100,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     if not target_docker_ignore.parent.exists():
         if not os.access(target_docker_ignore.parent, os.W_OK):
             logger.error(f'No write permission to docker ignore path: {target_docker_ignore.parent}')
-            return
+            return False
 
         logger.debug(f'Creating the docker ignore path: {target_docker_ignore.parent}')
         target_docker_ignore.parent.mkdir(parents=True)
@@ -190,8 +195,9 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     except BuildError as e:
         build_response = e.msg
 
-    if build_success:
-        logger.success(f'Finished building container image!')
-        return
+    if not build_success:
+        logger.error(f'Failed to build the container image: {build_response}')
+        return False
 
-    logger.error(f'Failed to build the container image: {build_response}')
+    logger.success(f'Finished building container image!')
+    return True
