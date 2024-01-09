@@ -19,7 +19,7 @@ HLP_ARG_TAG = 'The image path, optionally including the repository URL, image na
 @confirm_option
 @click.option('-nc', '--no-cache', is_flag=True, default=False, help=HLP_OPT_NO_CACHE)
 @click.option('-s', '--stage', default=None, help=HLP_OPT_STAGE)
-@click.argument('tag', default=None, required=False, metavar=HLP_ARG_TAG)
+@click.argument('tag', default=None, required=False, metavar='<tag>')
 @pass_environment
 def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str):
     """Builds the container image for the given tag."""

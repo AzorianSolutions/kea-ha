@@ -31,6 +31,20 @@ def confirm_option(function):
     return function
 
 
+def format_option(function):
+    """ A decorator that adds a format option to the command. """
+    meta_help = 'The output format to use. [table, json, TEMPLATE]'
+    function = click.option('--format', default='table', help=meta_help)(function)
+    return function
+
+
+def all_flag(function):
+    """ A decorator that adds an all flag to the command. """
+    meta_help = 'Operate on all items.'
+    function = click.option('-a', '--all', is_flag=True, default=False, help=meta_help)(function)
+    return function
+
+
 @click.group()
 @click.version_option(settings.version, '-V', '--version', message='%(version)s')
 @click.option('-d', '--debug', default=settings.debug, is_flag=True, help='Enables debug mode.')

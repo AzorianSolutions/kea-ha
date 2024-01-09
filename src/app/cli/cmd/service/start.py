@@ -1,12 +1,21 @@
 import click
 from loguru import logger
+from subprocess import CompletedProcess
 from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
 from app.util.console import Run
 from . import group
 
 
-def command(env: Environment, yes: bool):
+@group.command('start')
+@confirm_option
+@pass_environment
+def wrapper(env: Environment, yes: bool):
+    """Starts the container services."""
+    return command(env, yes)
+
+
+def command(env: Environment, yes: bool) -> CompletedProcess | bool:
     """Starts the container services."""
 
     if not yes:
@@ -15,7 +24,7 @@ def command(env: Environment, yes: bool):
         if not confirm:
             logger.warning('Aborting container service start process for lack of user confirmation '
                            + 'or the `-y` flag.')
-            return
+            return False
 
     logger.info(f'Starting the container services...')
 
@@ -25,14 +34,9 @@ def command(env: Environment, yes: bool):
         logger.error(f'Container services start failed.')
         if result:
             logger.error(result.stderr.decode("utf-8"))
-        return
+            return result
+        return False
 
     logger.success(f'Started the container services.')
 
-
-@group.command('start')
-@confirm_option
-@pass_environment
-def wrapper(env: Environment, yes: bool):
-    """Starts the container services."""
-    return command(env, yes)
+    return result

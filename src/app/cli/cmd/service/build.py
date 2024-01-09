@@ -2,18 +2,22 @@ import click
 import os
 from loguru import logger
 from pathlib import Path
+from subprocess import CompletedProcess
 from app.cli.entry import pass_environment, confirm_option
 from app.model.cli import Environment
 from app.util.config import ConfigBuilder
 from . import group
 
-HLP_OPT_YES = 'Automatically answer yes to all prompts.'
-
 
 @group.command('build')
 @confirm_option
 @pass_environment
-def command(env: Environment, yes: bool):
+def wrapper(env: Environment, yes: bool):
+    """Builds the container service files."""
+    return command(env, yes)
+
+
+def command(env: Environment, yes: bool) -> CompletedProcess | bool:
     """Builds the container service files."""
 
     version: str = env.settings.c('kea/version')
@@ -24,7 +28,7 @@ def command(env: Environment, yes: bool):
         if not confirm:
             logger.warning('Aborting container service file build process for lack of user confirmation '
                            + 'or the `-y` flag.')
-            return
+            return False
 
         click.echo('What version of the Kea software would you like to deploy?\n')
 
@@ -42,7 +46,7 @@ def command(env: Environment, yes: bool):
     if not env_file.parent.exists():
         if not os.access(env_file.parent, os.W_OK):
             logger.error(f'No write permission to environment file path: {env_file.parent}')
-            return
+            return False
 
         logger.debug(f'Creating the environment file path: {env_file.parent}')
         env_file.parent.mkdir(parents=True)
@@ -50,7 +54,7 @@ def command(env: Environment, yes: bool):
     # Save the service environment file if the path is writable
     if env_file.exists() and not os.access(env_file, os.W_OK):
         logger.error(f'No write permission to existing environment file: {env_file}')
-        return
+        return False
 
     # Build the services environment file
     file_contents = ConfigBuilder.build_env_file(env.settings.config)
@@ -68,14 +72,14 @@ def command(env: Environment, yes: bool):
         template = ConfigBuilder.build_tpl(compose_tpl_path, env.settings.config)
     except FileNotFoundError as e:
         logger.error(f'Failed to find the compose file template: {compose_tpl_path}')
-        return
+        return False
 
     compose_file = Path(env.settings.c('service/paths/compose/file'))
 
     if not compose_file.parent.exists():
         if not os.access(compose_file.parent, os.W_OK):
             logger.error(f'No write permission to compose file path: {compose_file.parent}')
-            return
+            return False
 
         logger.debug(f'Creating the compose file path: {compose_file.parent}')
         compose_file.parent.mkdir(parents=True)
@@ -107,7 +111,7 @@ def command(env: Environment, yes: bool):
             template = ConfigBuilder.build_tpl(conf_tpl_path, env.settings.config)
         except FileNotFoundError as e:
             logger.error(f'Failed to find the conf file template: {conf_tpl_path}')
-            return
+            return False
 
         conf_file = Path(env.settings.c(f'service/paths/conf/{conf_tpl_ref}'))
 

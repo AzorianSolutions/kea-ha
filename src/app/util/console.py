@@ -7,14 +7,21 @@ from app.model.cli import Environment
 
 
 class Run:
-    """ A callable class to run subprocess commands with environment extension. """
+    """ A callable class to run subprocess commands with environment definition. """
 
     @staticmethod
-    def c(command: list, env: dict = None, **kwargs) -> CompletedProcess:
+    def c(command: list, env: Environment, process_env: dict = None, **kwargs) -> CompletedProcess:
+        """ Runs the given command with the given environment, copies the current environment if None given. """
+
+        # Copy the current environment if none given
         if env is None:
             env = os.environ.copy()
 
-        return subprocess.run(command, env=env, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if env.debug:
+            from loguru import logger
+            logger.debug(f'Running Command: {command}')
+
+        return subprocess.run(command, env=process_env, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     @staticmethod
     def compose(command: list, env: Environment, **kwargs) -> CompletedProcess | bool:
@@ -43,4 +50,4 @@ class Run:
 
         compose_cmd.extend(command)
 
-        return Run.c(compose_cmd, None, **kwargs)
+        return Run.c(compose_cmd, env, None, **kwargs)
