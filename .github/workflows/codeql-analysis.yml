@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - 'dev'
-      - 'latest''
+      - 'latest'
       - 'main'
       - 'dependabot/**'
       - 'feature/**'
@@ -18,7 +18,7 @@ on:
     # The branches below must be a subset of the branches above
     branches:
       - 'dev'
-      - 'latest''
+      - 'latest'
       - 'main'
       - 'dependabot/**'
       - 'feature/**'
