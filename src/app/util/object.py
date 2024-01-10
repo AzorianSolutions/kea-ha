@@ -1,7 +1,7 @@
 import re
 
 
-class Reflective:
+class Reflective(dict):
     """A class for working with dynamically referenced nested data structures."""
 
     _ref: any = None
