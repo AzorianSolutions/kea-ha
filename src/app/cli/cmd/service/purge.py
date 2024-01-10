@@ -3,7 +3,7 @@ from loguru import logger
 from subprocess import CompletedProcess
 from app.cli.cmd.service.down import command as down_command
 from app.cli.entry import pass_environment, confirm_option
-from app.model.cli import Environment
+from ... import Environment
 from . import group
 
 

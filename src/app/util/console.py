@@ -3,7 +3,7 @@ import subprocess
 from loguru import logger
 from pathlib import Path
 from subprocess import CompletedProcess
-from app.model.cli import Environment
+from app.cli import Environment
 
 
 class Run:

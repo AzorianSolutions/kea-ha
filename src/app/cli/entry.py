@@ -3,7 +3,7 @@ import click
 from glob import glob
 from pathlib import Path
 from app import settings
-from app.model.cli import Environment
+from app.cli import Environment
 
 pass_environment = click.make_pass_decorator(Environment, ensure=True)
 

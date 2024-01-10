@@ -1,6 +1,6 @@
 import click
 from app.cli.entry import pass_environment
-from app.model.cli import Environment
+from ... import Environment
 from . import group
 
 meta_help: dict = {

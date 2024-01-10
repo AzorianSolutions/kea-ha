@@ -1,7 +1,7 @@
 import click
 from loguru import logger
 from app.cli.entry import pass_environment, confirm_option
-from app.model.cli import Environment
+from ... import Environment
 from app.model.images import ImageRepo
 from . import group
 

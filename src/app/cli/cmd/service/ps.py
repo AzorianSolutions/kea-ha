@@ -1,7 +1,7 @@
 from loguru import logger
 from subprocess import CompletedProcess
 from app.cli.entry import pass_environment, format_option, all_flag
-from app.model.cli import Environment
+from ... import Environment
 from app.util.console import Run
 from . import group, service_argument
 

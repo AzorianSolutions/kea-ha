@@ -2,7 +2,7 @@ import click
 from loguru import logger
 from subprocess import CompletedProcess
 from app.cli.entry import pass_environment, confirm_option
-from app.model.cli import Environment
+from ... import Environment
 from app.util.console import Run
 from . import group, service_argument
 

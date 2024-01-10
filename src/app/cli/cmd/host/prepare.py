@@ -3,7 +3,7 @@ import os
 from loguru import logger
 from pathlib import Path
 from app.cli.entry import pass_environment, confirm_option
-from app.model.cli import Environment
+from ... import Environment
 from app.util.console import Run
 from . import group
 
