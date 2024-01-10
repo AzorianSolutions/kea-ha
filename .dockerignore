@@ -2,6 +2,7 @@
 *.pyc
 .idea
 .env
+.github
 config.yml
 docker-compose.yml
 build

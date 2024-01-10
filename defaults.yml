@@ -1,0 +1,140 @@
+app:
+  name: kea-ha
+  version: 0.1.0
+  cli:
+    entrypoint: kha
+  environment:
+    prefix: KHA
+    file: .env
+host:
+  packages:
+    prepare: ca-certificates curl gnupg lsb-release
+    payload: docker-ce docker-ce-cli containerd.io net-tools
+templates:
+  conf:
+    kea_ctrl_agent: src/templates/conf/kea-ctrl-agent.conf.j2
+    kea_dhcp4: src/templates/conf/kea-dhcp4.conf.j2
+    kea_dhcp6: src/templates/conf/kea-dhcp6.conf.j2
+    kea_dhcp_ddns: src/templates/conf/kea-dhcp-ddns.conf.j2
+    supervisor_kea_ctrl_agent: src/templates/conf/supervisor-kea-ctrl-agent.conf.j2
+    supervisor_kea_dhcp4: src/templates/conf/supervisor-kea-dhcp4.conf.j2
+    supervisor_kea_dhcp6: src/templates/conf/supervisor-kea-dhcp6.conf.j2
+    supervisor_kea_dhcp_ddns: src/templates/conf/supervisor-kea-dhcp-ddns.conf.j2
+    supervisord: src/templates/conf/supervisord.conf.j2
+  docker:
+    dockerfile: src/templates/docker/Dockerfile.j2
+    docker_compose_mysql: src/templates/docker/docker-compose-mysql.yml.j2
+    docker_compose_pgsql: src/templates/docker/docker-compose-pgsql.yml.j2
+image:
+  test: false
+  uid: 0
+  user: root
+  gid: 0
+  group: root
+  repository:
+    url: docker.io
+    name: azoriansolutions/kea-ha
+    tag: latest
+  labels:
+    org.opencontainers.image.title: "Kea HA"
+    org.opencontainers.image.description: "Built from ISC Kea DHCP source with database back-end support"
+    org.opencontainers.image.url: "https://github.com/AzorianSolutions/kea-ha"
+    org.opencontainers.image.source: "https://github.com/AzorianSolutions/kea-ha"
+    org.opencontainers.image.version: "$c{kea/version}"
+    org.opencontainers.image.authors: "Azorian Solutions <help@azorian.solutions>"
+    org.opencontainers.image.licenses: "MIT"
+    org.opencontainers.image.created: "2024-01-06T20:42:00.000Z"
+  hosts:
+    cfdns: 1.1.1.1
+  paths:
+    share: /usr/share/kea-ha
+  service:
+    interface: eth2
+  build:
+    context: .
+    dockerfile: $c{service/paths/kha/root}/Dockerfile
+    args:
+      KHA_UID: $c{image/uid}
+      KHA_USER: $c{image/user}
+      KHA_GID: $c{image/gid}
+      KHA_GROUP: $c{image/group}
+      KEA_VERSION: $c{kea/version}
+      KHA_ROOT: $c{service/paths/kha/root}
+service:
+  name: kea-ha
+  environment:
+    prefix: KHA
+  paths:
+    kha:
+      root: ./build
+    compose:
+      file: $c{service/paths/kha/root}/docker-compose.yml
+      env: $c{service/paths/kha/root}/.env
+    conf:
+      kea_ctrl_agent: $c{service/paths/kea/config}/kea-ctrl-agent.conf
+      kea_dhcp4: $c{service/paths/kea/config}/kea-dhcp4.conf
+      kea_dhcp6: $c{service/paths/kea/config}/kea-dhcp6.conf
+      kea_dhcp_ddns: $c{service/paths/kea/config}/kea-dhcp-ddns.conf
+      supervisor_kea_ctrl_agent: $c{service/paths/supervisor/config}/conf.d/kea-ctrl-agent.conf
+      supervisor_kea_dhcp4: $c{service/paths/supervisor/config}/conf.d/kea-dhcp4.conf
+      supervisor_kea_dhcp6: $c{service/paths/supervisor/config}/conf.d/kea-dhcp6.conf
+      supervisor_kea_dhcp_ddns: $c{service/paths/supervisor/config}/conf.d/kea-dhcp-ddns.conf
+      supervisord: $c{service/paths/supervisor/config}/supervisord.conf
+    db:
+      data: $c{service/paths/kha/root}/var/lib/mysql
+      log: $c{service/paths/kha/root}/var/log/mysql
+    kea:
+      config: $c{service/paths/kha/root}/etc/kea
+      data: $c{service/paths/kha/root}/var/kea
+      lib: $c{service/paths/kha/root}/var/lib/kea
+      log: $c{service/paths/kha/root}/var/log/kea
+      run: $c{service/paths/kha/root}/var/run/kea
+      tmp: $c{service/paths/kha/root}/var/tmp/kea
+    supervisor:
+      config: $c{service/paths/kha/root}/etc/supervisor
+      log: $c{service/paths/kha/root}/var/log/supervisor
+  ports:
+    tcp:
+      http: 8000
+      supervisor: 8001
+    udp:
+    # If you want to make the Kea DHCP4 server available for to relays on the host network,
+    # uncomment the following line:
+    # dhcp: 67
+  networking:
+    mgmt:
+      interface: eth1
+      ipv4:
+        address: 192.168.2.10
+        netmask: 24
+        gateway: 192.168.2.1
+    service:
+      interface: eth2
+      ipv4:
+        address: 192.168.251.1
+        netmask: 29
+        gateway: 192.168.251.6
+kea:
+  version: 2.5.4
+  admin:
+    username: kea
+    password: kea
+  backend:
+    type: mysql
+    opts:
+      version: 8.2
+      host: db
+      port: 3306
+      root_password: kea
+      name: kea
+      username: kea
+      password: kea
+  logging:
+    severity: INFO
+    debuglevel: 0
+  ha:
+    enabled: false
+    mode: primary
+    peer:
+      ipv4:
+        address: 192.168.2.11

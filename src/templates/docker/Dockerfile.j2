@@ -58,20 +58,20 @@ RUN apt-get purge -y --auto-remove \
     rm -rf /usr/src/kea
 
 
-FROM base AS runner
-ARG KHA_SHARE_PATH=/usr/share/kea-ha
+FROM base AS service
+ARG KHA_UID=0
+ARG KHA_USER=root
+ARG KHA_GID=0
+ARG KHA_GROUP=root
+ARG KHA_ROOT=/opt/kha
 ARG KEA_VERSION=2.5.4
 ENV DEBIAN_FRONTEND=noninteractive
-ENV KHA_SHARE_PATH=${KHA_SHARE_PATH}
+ENV KHA_UID=${KHA_UID}
+ENV KHA_USER=${KHA_USER}
+ENV KHA_GID=${KHA_GID}
+ENV KHA_GROUP=${KHA_GROUP}
+ENV KHA_ROOT=${KHA_ROOT}
 ENV KEA_VERSION=${KEA_VERSION}
-LABEL org.opencontainers.image.title="ISC Kea HA (${KEA_VERSION})"
-LABEL org.opencontainers.image.description="Built from Kea source ${KEA_VERSION} with database back-end support",
-LABEL org.opencontainers.image.url="https://github.com/AzorianSolutions/kea-ha",
-LABEL org.opencontainers.image.source="https://github.com/AzorianSolutions/kea-ha",
-LABEL org.opencontainers.image.version="${KEA_VERSION}",
-LABEL org.opencontainers.image.authors="Azorian Solutions <help@azorian.solutions>"
-LABEL org.opencontainers.image.created="2024-01-06T20:42:00.000Z",
-LABEL org.opencontainers.image.licenses="MIT"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -84,9 +84,7 @@ RUN apt install -y --no-install-recommends \
         mysql-client \
         postgresql-client
 
-RUN adduser --system --no-create-home --disabled-password --group kea
-
-WORKDIR ${KHA_SHARE_PATH}
+WORKDIR ${KHA_ROOT}
 
 # Copy the Kea binaries, documentation, and source code into the container
 COPY --from=builder /etc/kea/ /etc/kea/
@@ -95,31 +93,43 @@ COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
 COPY --from=builder /share/kea /share/kea
 
-# Copy the default environment settings into the container
-COPY defaults.env ${KHA_SHARE_PATH}/defaults.env
+# Copy the entrypoint script into the container
+COPY ./entrypoint.sh /entrypoint.sh
 
-# Copy the configuration templates into the container
-COPY deploy/tpl/* ${KHA_SHARE_PATH}/tpl/
-
-# Create the entrypoint script in the container
-COPY deploy/inc/entrypoint.sh /entrypoint.sh
-
-# Make the entrypoint script executable
-RUN chmod +rwx /entrypoint.sh
-
-VOLUME ["/etc/kea", "${KHA_SHARE_PATH}", "/var/lib/kea", "/var/log/kea", "/var/log/supervisor"]
-
-EXPOSE 8000-8001/tcp 67/tcp 67/udp
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-HEALTHCHECK CMD [ "supervisorctl", "status" ]
+# Create service directories and update permissions
+RUN mkdir -p /etc/kea && \
+    mkdir -p /var/lib/kea && \
+    mkdir -p /var/log/kea && \
+    mkdir -p /var/run/kea && \
+    mkdir -p /var/log/supervisor/ && \
+    # Update service permissions \
+    chmod +x /entrypoint.sh && \
+    chown -R ${KHA_UID}:${KHA_GID} /entrypoint.sh && \
+    chown -R ${KHA_UID}:${KHA_GID} /etc/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/lib/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/log/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/run/kea && \
+    chown -R ${KHA_UID}:${KHA_GID} /var/log/supervisor
 
 
-FROM runner AS runner-dev
+FROM service AS service-diag
+ARG KHA_UID=0
+ARG KHA_GID=0
+ENV DEBIAN_FRONTEND=noninteractive
+ENV KHA_UID=${KHA_UID}
+ENV KHA_GID=${KHA_GID}
+
 RUN apt install -y --no-install-recommends \
         lsof \
         iproute2 \
         net-tools \
         iputils-ping \
         iptraf
+
+USER ${KHA_UID}:${KHA_GID}
+
+EXPOSE 8000-8001/tcp 67/tcp 67/udp
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+HEALTHCHECK CMD [ "supervisorctl", "status" ]
