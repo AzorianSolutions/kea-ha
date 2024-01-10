@@ -21,10 +21,15 @@ class Environment:
         """ Sets the app's settings. """
         self._settings = value
         if self.config is None:
-            self._config = Config(value.config)
+            self._config = Config(root=value.config, debug=value.debug)
 
     @property
     def config(self) -> Config:
+        """ Returns the environment configuration. """
+        return self._config
+
+    @property
+    def c(self) -> Config:
         """ Returns the environment configuration. """
         return self._config
 

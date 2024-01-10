@@ -26,6 +26,7 @@ templates:
     docker_compose_mysql: src/templates/docker/docker-compose-mysql.yml.j2
     docker_compose_pgsql: src/templates/docker/docker-compose-pgsql.yml.j2
 image:
+  test: false
   uid: 0
   user: root
   gid: 0
