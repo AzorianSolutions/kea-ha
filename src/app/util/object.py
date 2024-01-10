@@ -22,7 +22,7 @@ class Reflective:
     _properties: list = ['ref', 'root', 'parent', 'key', 'debug', 'parsing']
     """The list of properties to be treated as static by the __getattr__ and __setattr__ methods."""
 
-    _ref_pattern = re.compile(r'\$(c|e){([a-z_]+[a-z0-9_/]*)}', re.IGNORECASE)
+    _ref_pattern = re.compile(r'\$(c|e){([a-z0-9_/]+)}', re.IGNORECASE)
     """ The regular expression pattern used to match variable references in values. """
 
     @property
