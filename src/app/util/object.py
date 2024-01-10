@@ -154,6 +154,7 @@ class Reflective(dict):
         return iter(self._ref)
 
     def __init__(self, ref: any, parent: 'Reflective' or None = None, key: str or None = None):
+        super().__init__()
         self.ref = ref
         if parent:
             self.parent = parent
