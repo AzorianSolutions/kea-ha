@@ -78,6 +78,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt install -y --no-install-recommends \
         gettext-base \
         supervisor \
+        liblog4cplus-2.0.5 \
+        libmysqlclient21 \
+        libpq5 \
         mysql-client \
         postgresql-client \
         liblog4cplus-2.0.5 \
@@ -87,6 +90,7 @@ RUN apt install -y --no-install-recommends \
 WORKDIR ${KHA_ROOT}
 
 # Copy the Kea binaries, documentation, and source code into the container
+COPY --from=builder /etc/kea/ /etc/kea/
 COPY --from=builder /sbin/ /sbin/
 COPY --from=builder /usr/lib/*kea* /usr/lib/
 COPY --from=builder /share/doc/kea /share/doc/kea
