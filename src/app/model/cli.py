@@ -22,7 +22,7 @@ class Environment:
         self._settings = value
         if self.config is None:
             self._config = Reflective(ref=value.config)
-            self._config.debug = value.debug
+            # self._config.debug = value.debug
 
     @property
     def config(self) -> Reflective:
