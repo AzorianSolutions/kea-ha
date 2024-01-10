@@ -66,7 +66,7 @@ service:
     prefix: KHA
   paths:
     kha:
-      root: /opt/kha
+      root: ./build
     compose:
       file: $c{service/paths/kha/root}/docker-compose.yml
       env: $c{service/paths/kha/root}/.env

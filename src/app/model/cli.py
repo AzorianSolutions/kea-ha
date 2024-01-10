@@ -45,4 +45,4 @@ class Environment:
         """ Saves the current configuration to the given path, or the default if None given. """
         if path is None:
             path = self.settings.config_path
-        ConfigBuilder.save_yaml(path, self._config)
+        ConfigBuilder.save_yaml(path, self._config.ref)
