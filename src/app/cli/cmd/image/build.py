@@ -33,16 +33,16 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
     if tag:
         repo = ImageRepo.from_tag(tag)
         if repo.repo_url == "":
-            repo.repo_url = env.settings.c('image/repository/url')
+            repo.repo_url = env.config('image/repository/url')
         if repo.repo_name == "":
-            repo.repo_name = env.settings.c('image/repository/name')
+            repo.repo_name = env.config('image/repository/name')
         if repo.repo_tag == "":
-            repo.repo_tag = env.settings.c('image/repository/tag')
+            repo.repo_tag = env.config('image/repository/tag')
     else:
-        meta = env.settings.c('image/repository')
+        meta = env.config('image/repository')
         repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
 
-    version: str = env.settings.c('kea/version')
+    version: str = env.config('kea/version')
 
     if not yes:
         confirm = click.confirm('Are you sure you want to build the container image?', default=None)
@@ -53,16 +53,16 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
 
         click.echo('What version of the Kea software would you like to build?\n')
 
-        version_input = click.prompt('Kea Version', default=env.settings.c('kea/version'))
+        version_input = click.prompt('Kea Version', default=env.config('kea/version'))
 
         if version_input and version_input != version:
             version = version_input
 
             # Save the version change back to the configuration
-            env.settings.u('kea/version', version)
-            env.settings.save()
+            env.config.kea.version = version
+            env.save()
 
-    dockerfile_tpl_path = env.settings.c(f'templates/docker/dockerfile')
+    dockerfile_tpl_path = str(env.config(f'templates/docker/dockerfile'))
 
     # Render the Dockerfile template
     try:
@@ -71,7 +71,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
         logger.error(f'Failed to find the Dockerfile template: {dockerfile_tpl_path}')
         return False
 
-    dockerfile = Path(env.settings.c('image/build/dockerfile'))
+    dockerfile = Path(str(env.config('image/build/dockerfile')))
 
     if not dockerfile.parent.exists():
         if not os.access(dockerfile.parent, os.W_OK):
@@ -93,7 +93,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
         logger.error(f'No docker ignore file found at: {source_docker_ignore}')
         return False
 
-    kha_root = Path(env.settings.c('service/paths/kha/root'))
+    kha_root = Path(str(env.config('service/paths/kha/root')))
 
     target_docker_ignore = kha_root / '.dockerignore'
 
@@ -132,24 +132,24 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
     build_args: dict = {}
 
     # Attempt to load additional build arguments from the configuration
-    if isinstance(config_build_args := env.settings.c('image/build/args'), dict):
-        build_args.update(config_build_args)
+    if isinstance(config_build_args := env.config('image/build/args'), dict):
+        build_args.update(config_build_args.ref)
 
     # Additional labels added to the container image
     labels: dict = {}
 
     # Attempt to load additional image labels from the configuration
-    if isinstance(config_labels := env.settings.c('image/labels'), dict):
-        labels.update(config_labels)
+    if isinstance(config_labels := env.config('image/labels'), dict):
+        labels.update(config_labels.ref)
 
     # Additional host entries added to the container's `/etc/hosts` file
     hosts: dict = {}
 
     # Attempt to load additional host entries from the configuration
-    if isinstance(config_hosts := env.settings.c('image/hosts'), dict):
-        hosts.update(config_hosts)
+    if isinstance(config_hosts := env.config('image/hosts'), dict):
+        hosts.update(config_hosts.ref)
 
-    dockerfile: Path = Path(env.settings.c('image/build/dockerfile'))
+    dockerfile: Path = Path(str(env.config('image/build/dockerfile')))
     build_context: Path = dockerfile.parent
 
     command_args: dict = {
@@ -191,8 +191,10 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
         log_method(f'\n{output}')
 
     except APIError as e:
+        logger.error(e)
         build_response = e.response
     except BuildError as e:
+        logger.error(e)
         build_response = e.msg
 
     if not build_success:

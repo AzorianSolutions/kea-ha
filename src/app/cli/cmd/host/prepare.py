@@ -27,13 +27,13 @@ def command(env: Environment, yes: bool) -> bool:
     logger.info(f'Preparing the host environment for service containers; confirmed: {yes}; debug: {env.settings.debug}')
 
     # Update the APT cache
-    process = Run.c(['sudo', 'apt-get', 'update', '-y' if yes else ''])
+    process = Run.c(['sudo', 'apt-get', 'update', '-y' if yes else ''], env)
 
     if process.returncode != 0:
         logger.warning(f'APT update yielded errors: {process.stderr}')
 
     # Upgrade the host environment
-    process = Run.c(['sudo', 'apt-get', 'upgrade', '-y' if yes else ''])
+    process = Run.c(['sudo', 'apt-get', 'upgrade', '-y' if yes else ''], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to perform a upgrade on the host environment: {process.stderr}')
@@ -41,10 +41,10 @@ def command(env: Environment, yes: bool) -> bool:
             logger.info(process.stdout)
         return False
 
-    prepare_packages = env.settings.c('host/packages/prepare')
+    prepare_packages = env.config('host/packages/prepare')
 
     # Install the prepare-stage packages
-    process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *prepare_packages.split(' ')])
+    process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *prepare_packages.split(' ')], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to install first-stage APT packages in the host environment: {process.stderr}')
@@ -58,7 +58,7 @@ def command(env: Environment, yes: bool) -> bool:
         logger.info(f'Installing Docker keyring...')
 
         # Install the Docker keyring
-        process = Run.c(['curl', '-fsSL', 'https://download.docker.com/linux/ubuntu/gpg', '|', 'sudo', 'gpg', '--dearmor', '-o', docker_keyring])
+        process = Run.c(['curl', '-fsSL', 'https://download.docker.com/linux/ubuntu/gpg', '|', 'sudo', 'gpg', '--dearmor', '-o', docker_keyring], env)
 
         if process.returncode != 0:
             logger.error(f'Failed to install Docker keyring: {process.stderr}')
@@ -72,7 +72,7 @@ def command(env: Environment, yes: bool) -> bool:
         logger.info(f'Installing Docker APT sources...')
 
         # Install the Docker APT sources
-        process = Run.c(['echo', '"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu', '$(lsb_release -cs) stable"', '|', 'sudo', 'tee', apt_sources])
+        process = Run.c(['echo', '"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu', '$(lsb_release -cs) stable"', '|', 'sudo', 'tee', apt_sources], env)
 
         if process.returncode != 0:
             logger.error(f'Failed to install Docker APT sources: {process.stderr}')
@@ -81,15 +81,15 @@ def command(env: Environment, yes: bool) -> bool:
             return False
 
     # Update the APT cache
-    process = Run.c(['sudo', 'apt-get', 'update', '-y' if yes else ''])
+    process = Run.c(['sudo', 'apt-get', 'update', '-y' if yes else ''], env)
 
     if process.returncode != 0:
         logger.warning(f'APT update yielded errors: {process.stderr}')
 
-    payload_packages = env.settings.c('host/packages/payload')
+    payload_packages = env.config('host/packages/payload')
 
     # Install the payload packages
-    process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *payload_packages.split(' ')])
+    process = Run.c(['sudo', 'apt-get', 'install', '-y' if yes else '', *payload_packages.split(' ')], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to install first-stage APT packages in the host environment: {process.stderr}')
@@ -108,7 +108,7 @@ def command(env: Environment, yes: bool) -> bool:
         logger.debug(f'Docker daemon configuration already exists at {docker_config_path}.')
 
     # Restart the Docker daemon
-    process = Run.c(['sudo', 'systemctl', 'restart', 'docker'])
+    process = Run.c(['sudo', 'systemctl', 'restart', 'docker'], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to restart Docker daemon: {process.stderr}')
@@ -116,7 +116,7 @@ def command(env: Environment, yes: bool) -> bool:
             logger.info(process.stdout)
 
     # Install the Docker daemon service
-    process = Run.c(['sudo', 'systemctl', 'enable', 'docker'])
+    process = Run.c(['sudo', 'systemctl', 'enable', 'docker'], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to enable Docker daemon service: {process.stderr}')
@@ -124,7 +124,7 @@ def command(env: Environment, yes: bool) -> bool:
             logger.info(process.stdout)
 
     # Add the current user to the Docker group
-    process = Run.c(['sudo', 'adduser', os.getlogin(), 'docker'])
+    process = Run.c(['sudo', 'adduser', os.getlogin(), 'docker'], env)
 
     if process.returncode != 0:
         logger.error(f'Failed to add current user to Docker group: {process.stderr}')

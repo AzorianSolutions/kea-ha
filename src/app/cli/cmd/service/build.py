@@ -20,7 +20,7 @@ def wrapper(env: Environment, yes: bool):
 def command(env: Environment, yes: bool) -> CompletedProcess | bool:
     """Builds the container service files."""
 
-    version: str = env.settings.c('kea/version')
+    version: str = env.config('kea/version')
 
     if not yes:
         confirm = click.confirm('Are you sure you want to build the container service files?', default=None)
@@ -32,16 +32,16 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
 
         click.echo('What version of the Kea software would you like to deploy?\n')
 
-        version_input = click.prompt('Kea Version', default=env.settings.c('kea/version'))
+        version_input = click.prompt('Kea Version', default=env.config('kea/version'))
 
         if version_input and version_input != version:
             version = version_input
 
             # Save the version change back to the configuration
-            env.settings.u('kea/version', version)
-            env.settings.save()
+            env.config.kea.version = version
+            env.save()
 
-    env_file = Path(env.settings.c('service/paths/compose/env'))
+    env_file = Path(str(env.config('service/paths/compose/env')))
 
     if not env_file.parent.exists():
         if not os.access(env_file.parent, os.W_OK):
@@ -65,7 +65,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
 
     logger.info(f'Saved the service environment file: {env_file}')
 
-    compose_tpl_path = env.settings.c(f'templates/docker/docker_compose_{env.settings.c("kea/backend/type")}')
+    compose_tpl_path = str(env.config(f'templates/docker/docker_compose_{env.config("kea/backend/type")}'))
 
     # Render the configuration file template
     try:
@@ -74,7 +74,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
         logger.error(f'Failed to find the compose file template: {compose_tpl_path}')
         return False
 
-    compose_file = Path(env.settings.c('service/paths/compose/file'))
+    compose_file = Path(str(env.config('service/paths/compose/file')))
 
     if not compose_file.parent.exists():
         if not os.access(compose_file.parent, os.W_OK):
@@ -104,7 +104,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
 
     for tpl_name in templates:
         conf_tpl_ref = tpl_name.replace('-', '_')
-        conf_tpl_path = env.settings.c(f'templates/conf/{conf_tpl_ref}')
+        conf_tpl_path = str(env.config(f'templates/conf/{conf_tpl_ref}'))
 
         # Render the configuration file template
         try:
@@ -113,7 +113,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
             logger.error(f'Failed to find the conf file template: {conf_tpl_path}')
             return False
 
-        conf_file = Path(env.settings.c(f'service/paths/conf/{conf_tpl_ref}'))
+        conf_file = Path(str(env.config(f'service/paths/conf/{conf_tpl_ref}')))
 
         if not conf_file.parent.exists():
             logger.debug(f'Creating the service conf file directory: {conf_file.parent}')

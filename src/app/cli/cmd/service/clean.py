@@ -28,8 +28,8 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
                            + 'or the `-y` flag.')
             return False
 
-    compose_file = Path(env.settings.c('service/paths/compose/file'))
-    env_file = Path(env.settings.c('service/paths/compose/env'))
+    compose_file = Path(str(env.config('service/paths/compose/file')))
+    env_file = Path(str(env.config('service/paths/compose/env')))
 
     if compose_file.exists():
         os.remove(compose_file)

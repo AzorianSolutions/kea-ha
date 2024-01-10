@@ -54,12 +54,12 @@ image:
     context: .
     dockerfile: $c{service/paths/kha/root}/Dockerfile
     args:
-      - KHA_UID=$c{image/uid}
-      - KHA_USER=$c{image/user}
-      - KHA_GID=$c{image/gid}
-      - KHA_GROUP=$c{image/group}
-      - KEA_VERSION=$c{kea/version}
-      - KHA_ROOT=$c{service/paths/kha/root}
+      KHA_UID: $c{image/uid}
+      KHA_USER: $c{image/user}
+      KHA_GID: $c{image/gid}
+      KHA_GROUP: $c{image/group}
+      KEA_VERSION: $c{kea/version}
+      KHA_ROOT: $c{service/paths/kha/root}
 service:
   name: kea-ha
   environment:

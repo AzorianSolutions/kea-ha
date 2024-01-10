@@ -23,14 +23,14 @@ def command(env: Environment, yes: bool, tag: str) -> bool:
     if tag:
         repo = ImageRepo.from_tag(tag)
         if repo.repo_url == "":
-            repo.repo_url = env.settings.c('image/repository/url')
+            repo.repo_url = env.config('image/repository/url')
         if repo.repo_name == "":
-            repo.repo_name = env.settings.c('image/repository/name')
+            repo.repo_name = env.config('image/repository/name')
         if repo.repo_tag == "":
-            repo.repo_tag = env.settings.c('image/repository/tag')
+            repo.repo_tag = env.config('image/repository/tag')
     else:
-        meta = env.settings.c('image/repository')
-        repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
+        meta = env.config('image/repository')
+        repo = ImageRepo(meta.url, meta.name, meta.tag)
 
     if not yes:
         confirm = click.confirm(f'Are you sure you want to purge the container image {repo.repo_path}?', default=None)

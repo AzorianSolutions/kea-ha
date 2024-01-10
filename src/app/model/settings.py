@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
-from app.util.config import ConfigBuilder, ConfigLoader, ConfigParser
+from app.util.config import ConfigLoader
 
 DEFAULT_CONFIG_PATH: Path = Path('defaults.yml')
 base_config: dict = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
@@ -55,20 +55,6 @@ class AppSettings(BaseSettings):
                     self._config.update(user_config)
 
         return self._config
-
-    def c(self, key: str, default: any = None, parse: bool = True) -> any:
-        """ Returns the configuration value for the given key, or the given default if not found. """
-        return ConfigParser.reference(self.config, key, default, parse)
-
-    def u(self, key: str, value: any) -> dict:
-        """ Updates the configuration value for the given key. """
-        return ConfigParser.update(self.config, key, value)
-
-    def save(self, path: str | Path = None) -> None:
-        """ Saves the current configuration to the given path, or the default if None given. """
-        if path is None:
-            path = self.config_path
-        ConfigBuilder.save_yaml(path, self.config)
 
     class Config:
         env_prefix = base_config['app']['environment']['prefix'] + '_'

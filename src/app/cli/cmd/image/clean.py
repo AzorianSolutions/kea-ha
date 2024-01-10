@@ -27,8 +27,8 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
                            + 'or the `-y` flag.')
             return False
 
-    build_path = Path(env.settings.c('service/paths/kha/root'))
-    dockerfile = Path(env.settings.c('image/build/dockerfile'))
+    build_path = Path(str(env.config('service/paths/kha/root')))
+    dockerfile = Path(str(env.config('image/build/dockerfile')))
     dockerignore_file = build_path / '.dockerignore'
     entrypoint_file = build_path / 'entrypoint.sh'
 

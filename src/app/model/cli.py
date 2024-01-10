@@ -1,4 +1,6 @@
+from pathlib import Path
 from app.model.settings import AppSettings
+from app.util.config import ConfigBuilder
 from app.util.object import Reflective
 
 
@@ -38,3 +40,9 @@ class Environment:
     def debug(self) -> bool:
         """ Returns whether debug mode is enabled. """
         return self._settings.debug if isinstance(self._settings, AppSettings) else False
+
+    def save(self, path: str | Path = None) -> None:
+        """ Saves the current configuration to the given path, or the default if None given. """
+        if path is None:
+            path = self.settings.config_path
+        ConfigBuilder.save_yaml(path, self._config)

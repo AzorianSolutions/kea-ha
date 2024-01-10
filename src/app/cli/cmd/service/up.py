@@ -22,7 +22,7 @@ def command(env: Environment, yes: bool, service: str) -> CompletedProcess | boo
     prompt_suffix = f' `{service}`?' if service else 's?'
     log_suffix = f' `{service}`' if service else 's'
 
-    version: str = env.settings.c('kea/version')
+    version: str = env.config('kea/version')
 
     if not yes:
         prompt = f'Are you sure you want to install the container service{prompt_suffix}'
@@ -35,14 +35,14 @@ def command(env: Environment, yes: bool, service: str) -> CompletedProcess | boo
 
         click.echo('What version of the Kea software would you like to deploy?\n')
 
-        version_input = click.prompt('Kea Version', default=env.settings.c('kea/version'))
+        version_input = click.prompt('Kea Version', default=env.config('kea/version'))
 
         if version_input and version_input != version:
             version = version_input
 
             # Save the version change back to the configuration
-            env.settings.u('kea/version', version)
-            env.settings.save()
+            env.config.kea.version = version
+            env.save()
 
     logger.info(f'Installing the container service{log_suffix}...')
 

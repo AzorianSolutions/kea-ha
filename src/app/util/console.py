@@ -26,8 +26,8 @@ class Run:
     @staticmethod
     def compose(command: list, env: Environment, **kwargs) -> CompletedProcess | bool:
 
-        compose_file = Path(env.settings.c('service/paths/compose/file'))
-        env_file = Path(env.settings.c('service/paths/compose/env'))
+        compose_file = Path(env.config('service/paths/compose/file'))
+        env_file = Path(env.config('service/paths/compose/env'))
 
         if not compose_file.exists():
             logger.error(f'Failed to find the compose file: {compose_file}')
