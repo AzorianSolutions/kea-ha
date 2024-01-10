@@ -1,5 +1,5 @@
-from app.model.config import Config
 from app.model.settings import AppSettings
+from app.util.object import Reflective
 
 
 class Environment:
@@ -8,7 +8,7 @@ class Environment:
     _settings: AppSettings = None
     """ The environment settings. """
 
-    _config: Config = None
+    _config: Reflective = None
     """ The environment configuration. """
 
     @property
@@ -21,15 +21,16 @@ class Environment:
         """ Sets the app's settings. """
         self._settings = value
         if self.config is None:
-            self._config = Config(root=value.config, debug=value.debug)
+            self._config = Reflective(ref=value.config)
+            self._config.debug = value.debug
 
     @property
-    def config(self) -> Config:
+    def config(self) -> Reflective:
         """ Returns the environment configuration. """
         return self._config
 
     @property
-    def c(self) -> Config:
+    def c(self) -> Reflective:
         """ Returns the environment configuration. """
         return self._config
 

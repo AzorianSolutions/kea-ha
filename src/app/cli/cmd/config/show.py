@@ -1,7 +1,6 @@
 import click
 from app.cli.entry import pass_environment, format_option
 from app.model.cli import Environment
-from app.model.config import Config
 from . import group
 
 meta_help: dict = {
