@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
+from typing import Union
 from app.util.config import ConfigLoader
 
 DEFAULT_CONFIG_PATH: Path = Path('defaults.yml')
@@ -10,25 +11,25 @@ base_config: dict = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
 class AppSettings(BaseSettings):
     """ The application settings class that loads setting values from the application environment. """
 
-    _config: dict | None = None
+    _config: Union[dict, None] = None
     """ Additional configuration settings loaded automatically from the YAML file given in the config_path setting. """
 
-    config_path: str | Path = 'config.yml'
+    config_path: Union[str, Path] = 'config.yml'
     """ The path to the YAML file containing additional configuration settings. """
 
     debug: bool = False
     """ Whether debug mode is enabled. """
 
-    env_file: str | Path | None = None
+    env_file: Union[str, Path, None] = None
     """ The path to the environment file to load settings from. """
 
     env_file_encoding: str = 'UTF-8'
     """ The file encoding of the environment file to load settings from. """
 
-    env_secrets_dir: str | Path | None = None
+    env_secrets_dir: Union[str, Path, None] = None
     """ The path to the secrets directory to load environment variable values from. """
 
-    root_path: str | Path = Path(os.getcwd())
+    root_path: Union[str, Path] = Path(os.getcwd())
     """ The root path of the application which is typically the project repository root directory. """
 
     version: str = base_config['app']['version']
@@ -43,7 +44,7 @@ class AppSettings(BaseSettings):
             if DEFAULT_CONFIG_PATH.exists():
                 self._config = ConfigLoader.load_yaml(DEFAULT_CONFIG_PATH)
 
-            if isinstance(self.config_path, Path | str) and Path(self.config_path).exists():
+            if isinstance(self.config_path, Union[str, Path]) and Path(self.config_path).exists():
                 user_config = ConfigLoader.load_yaml(self.config_path)
 
                 if user_config is None:

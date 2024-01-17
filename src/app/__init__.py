@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Union
 from app.model.settings import AppSettings
 from app.util.config import ConfigLoader
 
@@ -15,7 +16,7 @@ DEFAULT_ENV_PATH: Path = ROOT_PATH / '.env'
 DEFAULT_ENV_FILE_ENCODING: str = 'UTF-8'
 """ The default file encoding of the environment file to load settings from. """
 
-DEFAULT_SECRETS_PATH: Path or None = None
+DEFAULT_SECRETS_PATH: Union[Path, None] = None
 """ The default path to the secrets directory to load environment variable values from. """
 
 
