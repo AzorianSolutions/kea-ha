@@ -1,8 +1,7 @@
 from pathlib import Path
-
+from reflective import Reflective
 from app import AppSettings
 from app.util.config import ConfigBuilder
-from app.util.object import Reflective
 
 
 class Environment:
@@ -24,8 +23,7 @@ class Environment:
         """ Sets the app's settings. """
         self._settings = value
         if self.config is None:
-            self._config = Reflective(ref=value.config)
-            # self._config.debug = value.debug
+            self._config = Reflective(value.config)
 
     @property
     def config(self) -> Reflective:
@@ -42,7 +40,7 @@ class Environment:
         """ Returns whether debug mode is enabled. """
         return self._settings.debug if isinstance(self._settings, AppSettings) else False
 
-    def save(self, path: str | Path = None) -> None:
+    def save(self, path: str or Path = None) -> None:
         """ Saves the current configuration to the given path, or the default if None given. """
         if path is None:
             path = self.settings.config_path

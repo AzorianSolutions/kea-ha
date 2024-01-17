@@ -24,12 +24,12 @@ def command(env: Environment, format: str, flat: bool = True, key: str = None) -
     ref = env.config
 
     if key:
-        ref = getattr(env.config, key)
+        ref = env.config[key]
 
     if format == 'json':
-        click.echo(ref.json(flat=flat))
+        click.echo(ref().to_json(flat=flat))
     elif format == 'yaml':
-        click.echo(ref.yaml())
+        click.echo(ref().yaml)
     else:
         click.echo(ref)
 
