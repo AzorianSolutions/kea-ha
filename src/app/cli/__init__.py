@@ -1,5 +1,6 @@
 from pathlib import Path
 from reflective import Reflective
+from typing import Union
 from app import AppSettings
 from app.util.config import ConfigBuilder
 
@@ -40,7 +41,7 @@ class Environment:
         """ Returns whether debug mode is enabled. """
         return self._settings.debug if isinstance(self._settings, AppSettings) else False
 
-    def save(self, path: str or Path = None) -> None:
+    def save(self, path: Union[str, Path, None] = None) -> None:
         """ Saves the current configuration to the given path, or the default if None given. """
         if path is None:
             path = self.settings.config_path

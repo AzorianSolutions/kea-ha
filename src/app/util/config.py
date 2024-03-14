@@ -1,15 +1,15 @@
 import os
 import re
-import typing
 import yaml
 from pathlib import Path
+from typing import Union
 
 
 class ConfigBuilder:
     """A class for building configuration files."""
 
     @staticmethod
-    def save_yaml(path: str | Path, config: dict) -> None:
+    def save_yaml(path: Union[str, Path], config: dict) -> None:
         """Saves the given configuration dictionary to the given YAML file path."""
 
         with open(str(path), 'w') as f:
@@ -40,7 +40,7 @@ class ConfigBuilder:
         return env_file
 
     @staticmethod
-    def build_tpl(template: str | Path, config: dict, parse: bool = True) -> str:
+    def build_tpl(template: Union[str, Path], config: dict, parse: bool = True) -> str:
         """Builds a configuration file from the given template and configuration dictionary."""
         from jinja2 import Environment, FileSystemLoader
 
@@ -64,9 +64,9 @@ class ConfigLoader:
     """A class for loading simple configuration settings from a text file."""
 
     @staticmethod
-    def load_file(path: Path or str) -> dict[str, typing.Any]:
+    def load_file(path: Union[str, Path]) -> dict:
         """Loads the given configuration file and returns a dictionary of key/value pairs."""
-        config: dict[str, typing.Any] = {}
+        config: dict = {}
 
         if not os.path.exists(path):
             return config
@@ -80,11 +80,11 @@ class ConfigLoader:
         return config
 
     @staticmethod
-    def load_yaml(path: Path or str) -> dict[str, typing.Any]:
+    def load_yaml(path: Union[str, Path]) -> dict:
         """Loads the given configuration file and returns a dictionary of key/value pairs."""
         from yaml import YAMLError
 
-        config: dict[str, typing.Any] = {}
+        config: dict = {}
 
         if not isinstance(path, Path):
             path = Path(path)
@@ -157,7 +157,7 @@ class ConfigParser:
         """ Parses the given value for configuration references, updating the values with current configuration
         values, and returning the updated copy. """
 
-        result = value.copy() if isinstance(value, dict | list) else value
+        result = value.copy() if isinstance(value, Union[dict, list]) else value
 
         if isinstance(result, str):
             result = ConfigParser.parse_string(config, result, default)
@@ -218,8 +218,8 @@ class ConfigUtil:
     """A class for working with configuration related data and files."""
 
     @staticmethod
-    def flatten(config: dict[str, typing.Any], prefix: str = '') -> dict[str, typing.Any]:
-        result: dict[str, typing.Any] = {}
+    def flatten(config: dict, prefix: str = '') -> dict:
+        result: dict = {}
 
         for key, value in config.items():
             key = key.upper()
