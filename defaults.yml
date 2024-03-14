@@ -52,14 +52,14 @@ image:
     interface: eth2
   build:
     context: .
-    dockerfile: $r{/service/paths/kha/root}/Dockerfile
+    dockerfile: $r{service/paths/kha/root}/Dockerfile
     args:
-      KHA_UID: $r{/image/uid}
-      KHA_USER: $r{/image/user}
-      KHA_GID: $r{/image/gid}
-      KHA_GROUP: $r{/image/group}
-      KEA_VERSION: $r{/kea/version}
-      KHA_ROOT: $r{/service/paths/kha/root}
+      KHA_UID: $r{image/uid}
+      KHA_USER: $r{image/user}
+      KHA_GID: $r{image/gid}
+      KHA_GROUP: $r{image/group}
+      KEA_VERSION: $r{kea/version}
+      KHA_ROOT: $r{service/paths/kha/root}
 service:
   name: kea-ha
   environment:
@@ -68,31 +68,31 @@ service:
     kha:
       root: ./build
     compose:
-      file: $r{/service/paths/kha/root}/docker-compose.yml
-      env: $r{/service/paths/kha/root}/.env
+      file: $r{service/paths/kha/root}/docker-compose.yml
+      env: $r{service/paths/kha/root}/.env
     conf:
-      kea_ctrl_agent: $r{/service/paths/kea/config}/kea-ctrl-agent.conf
-      kea_dhcp4: $r{/service/paths/kea/config}/kea-dhcp4.conf
-      kea_dhcp6: $r{/service/paths/kea/config}/kea-dhcp6.conf
-      kea_dhcp_ddns: $r{/service/paths/kea/config}/kea-dhcp-ddns.conf
-      supervisor_kea_ctrl_agent: $r{/service/paths/supervisor/config}/conf.d/kea-ctrl-agent.conf
-      supervisor_kea_dhcp4: $r{/service/paths/supervisor/config}/conf.d/kea-dhcp4.conf
-      supervisor_kea_dhcp6: $r{/service/paths/supervisor/config}/conf.d/kea-dhcp6.conf
-      supervisor_kea_dhcp_ddns: $r{/service/paths/supervisor/config}/conf.d/kea-dhcp-ddns.conf
-      supervisord: $r{/service/paths/supervisor/config}/supervisord.conf
+      kea_ctrl_agent: $r{service/paths/kea/config}/kea-ctrl-agent.conf
+      kea_dhcp4: $r{service/paths/kea/config}/kea-dhcp4.conf
+      kea_dhcp6: $r{service/paths/kea/config}/kea-dhcp6.conf
+      kea_dhcp_ddns: $r{service/paths/kea/config}/kea-dhcp-ddns.conf
+      supervisor_kea_ctrl_agent: $r{service/paths/supervisor/config}/conf.d/kea-ctrl-agent.conf
+      supervisor_kea_dhcp4: $r{service/paths/supervisor/config}/conf.d/kea-dhcp4.conf
+      supervisor_kea_dhcp6: $r{service/paths/supervisor/config}/conf.d/kea-dhcp6.conf
+      supervisor_kea_dhcp_ddns: $r{service/paths/supervisor/config}/conf.d/kea-dhcp-ddns.conf
+      supervisord: $r{service/paths/supervisor/config}/supervisord.conf
     db:
-      data: $r{/service/paths/kha/root}/var/lib/mysql
-      log: $r{/service/paths/kha/root}/var/log/mysql
+      data: $r{service/paths/kha/root}/var/lib/mysql
+      log: $r{service/paths/kha/root}/var/log/mysql
     kea:
-      config: $r{/service/paths/kha/root}/etc/kea
-      data: $r{/service/paths/kha/root}/var/kea
-      lib: $r{/service/paths/kha/root}/var/lib/kea
-      log: $r{/service/paths/kha/root}/var/log/kea
-      run: $r{/service/paths/kha/root}/var/run/kea
-      tmp: $r{/service/paths/kha/root}/var/tmp/kea
+      config: $r{service/paths/kha/root}/etc/kea
+      data: $r{service/paths/kha/root}/var/kea
+      lib: $r{service/paths/kha/root}/var/lib/kea
+      log: $r{service/paths/kha/root}/var/log/kea
+      run: $r{service/paths/kha/root}/var/run/kea
+      tmp: $r{service/paths/kha/root}/var/tmp/kea
     supervisor:
-      config: $r{/service/paths/kha/root}/etc/supervisor
-      log: $r{/service/paths/kha/root}/var/log/supervisor
+      config: $r{service/paths/kha/root}/etc/supervisor
+      log: $r{service/paths/kha/root}/var/log/supervisor
   ports:
     tcp:
       http: 8000
@@ -105,12 +105,14 @@ service:
     mgmt:
       interface: eth1
       ipv4:
+        network: 192.168.2.0
         address: 192.168.2.10
         netmask: 24
         gateway: 192.168.2.1
     service:
       interface: eth2
       ipv4:
+        network: 192.168.251.0
         address: 192.168.251.1
         netmask: 29
         gateway: 192.168.251.6

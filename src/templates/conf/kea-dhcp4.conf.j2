@@ -10,12 +10,32 @@
   {% endif %}
 {% endif %}{
     "Dhcp4": {
+        "client-classes": [
+            {
+               "name": "reserved-class1",
+               "option-data": [
+                   {
+                       "name": "routers",
+                       "data": "100.65.0.1"
+                   }
+               ]
+            },
+            {
+               "name": "reserved-class2",
+               "option-data": [
+                   {
+                       "name": "domain-name-servers",
+                       "data": "1.1.1.1, 8.8.8.8"
+                   }
+               ]
+            }
+        ],
         "subnet4": [
             {
                 "id": 1,
                 "interface": "{{ image.service.interface }}",
                 "subnet": "100.65.0.0/22",
-                "routers": "100.65.0.1",
+                "require-client-classes": [ "reserved-class1", "reserved-class2" ],
                 "pools": [
                     {
                          "pool": "100.65.0.5 - 100.65.3.254"
@@ -169,10 +189,10 @@
         }{% if kea.ha.enabled %},
         "hooks-libraries": [
             {
-                "library": "/usr/lib/kea/hooks/libdhcp_lease_cmds.so"
+                "library": "/usr/lib/hooks/libdhcp_lease_cmds.so"
             },
             {
-                "library": "/usr/lib/kea/hooks/libdhcp_ha.so",
+                "library": "/usr/lib/hooks/libdhcp_ha.so",
                 "parameters": {
                     "high-availability": [ {
                         "this-server-name": "{{ ha_node_name }}",

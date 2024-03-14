@@ -33,7 +33,7 @@ services:
     ports:
       - {{ service.ports.tcp.http }}:{{ service.ports.tcp.http }}
     env_file:
-      - .env
+      - ./build/.env
 networks:
   db0:
     name: db0
@@ -47,7 +47,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: {{ service.networking.mgmt.ipv4.address }}/{{ service.networking.mgmt.ipv4.netmask }}
+        - subnet: {{ service.networking.mgmt.ipv4.network }}/{{ service.networking.mgmt.ipv4.netmask }}
           gateway: {{ service.networking.mgmt.ipv4.gateway }}
   service0:
     name: service0
@@ -58,5 +58,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: {{ service.networking.service.ipv4.address }}/{{ service.networking.service.ipv4.netmask }}
+        - subnet: {{ service.networking.service.ipv4.network }}/{{ service.networking.service.ipv4.netmask }}
           gateway: {{ service.networking.service.ipv4.gateway }}
