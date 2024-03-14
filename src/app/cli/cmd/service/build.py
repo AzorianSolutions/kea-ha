@@ -20,7 +20,7 @@ def wrapper(env: Environment, yes: bool):
 def command(env: Environment, yes: bool) -> CompletedProcess | bool:
     """Builds the container service files."""
 
-    version: str = env.config('kea/version')
+    version: str = env.config('/kea/version')
 
     if not yes:
         confirm = click.confirm('Are you sure you want to build the container service files?', default=None)
@@ -32,7 +32,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
 
         click.echo('What version of the Kea software would you like to deploy?\n')
 
-        version_input = click.prompt('Kea Version', default=env.config('kea/version'))
+        version_input = click.prompt('Kea Version', default=env.config('/kea/version'))
 
         if version_input and version_input != version:
             version = version_input
@@ -41,7 +41,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
             env.config.kea.version = version
             env.save()
 
-    env_file = Path(str(env.config('service/paths/compose/env')))
+    env_file = Path(str(env.config('/service/paths/compose/env')))
 
     if not env_file.parent.exists():
         if not os.access(env_file.parent, os.W_OK):
@@ -74,7 +74,7 @@ def command(env: Environment, yes: bool) -> CompletedProcess | bool:
         logger.error(f'Failed to find the compose file template: {compose_tpl_path}')
         return False
 
-    compose_file = Path(str(env.config('service/paths/compose/file')))
+    compose_file = Path(str(env.config('/service/paths/compose/file')))
 
     if not compose_file.parent.exists():
         if not os.access(compose_file.parent, os.W_OK):

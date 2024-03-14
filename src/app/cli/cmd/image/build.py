@@ -40,7 +40,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
             repo.repo_tag = env.config('image/repository/tag')
     else:
         meta = env.config('image/repository')
-        repo = ImageRepo(meta['url'], meta['name'], meta['tag'])
+        repo = ImageRepo(meta.url().ref, meta.name().ref, meta.tag().ref)
 
     version: str = env.config('kea/version')
 
@@ -87,7 +87,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
 
     logger.info(f'Saved the image Dockerfile: {dockerfile}')
 
-    source_docker_ignore = env.settings.root_path / '.dockerignore'
+    source_docker_ignore = Path(env.settings.root_path) / '.dockerignore'
 
     if not source_docker_ignore.exists():
         logger.error(f'No docker ignore file found at: {source_docker_ignore}')
@@ -116,7 +116,7 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
     logger.info(f'Created Docker ignore file: {target_docker_ignore}')
 
     # Temporary until entrypoint bash script goes away
-    entrypoint_tpl_path = env.settings.root_path / 'deploy' / 'docker' / 'entrypoint.sh'
+    entrypoint_tpl_path = Path(env.settings.root_path) / 'deploy' / 'docker' / 'entrypoint.sh'
 
     with open(kha_root / 'entrypoint.sh', 'w') as f:
         f.write(entrypoint_tpl_path.read_text())
@@ -133,21 +133,21 @@ def command(env: Environment, yes: bool, no_cache: bool, stage: str, tag: str) -
 
     # Attempt to load additional build arguments from the configuration
     if isinstance(config_build_args := env.config('image/build/args'), dict):
-        build_args.update(config_build_args.ref)
+        build_args.update(config_build_args().ref)
 
     # Additional labels added to the container image
     labels: dict = {}
 
     # Attempt to load additional image labels from the configuration
     if isinstance(config_labels := env.config('image/labels'), dict):
-        labels.update(config_labels.ref)
+        labels.update(config_labels().ref)
 
     # Additional host entries added to the container's `/etc/hosts` file
     hosts: dict = {}
 
     # Attempt to load additional host entries from the configuration
     if isinstance(config_hosts := env.config('image/hosts'), dict):
-        hosts.update(config_hosts.ref)
+        hosts.update(config_hosts().ref)
 
     dockerfile: Path = Path(str(env.config('image/build/dockerfile')))
     build_context: Path = dockerfile.parent

@@ -11,15 +11,15 @@ class ImageRepo(object):
 
         repo_path: str = ''
 
-        if self.repo_url:
+        if self.repo_url is not None:
             repo_path += self.repo_url
 
-        if self.repo_name:
+        if self.repo_name is not None:
             if repo_path:
                 repo_path += '/'
             repo_path += f'{self.repo_name}'
 
-        if self.repo_tag:
+        if self.repo_tag is not None:
             repo_path += f':{self.repo_tag}'
 
         return repo_path
